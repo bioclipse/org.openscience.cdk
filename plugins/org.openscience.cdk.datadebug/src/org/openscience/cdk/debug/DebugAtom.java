@@ -29,10 +29,10 @@ import org.openscience.cdk.Atom;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomType;
 import org.openscience.cdk.interfaces.IBond;
-import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IChemObjectChangeEvent;
 import org.openscience.cdk.interfaces.IChemObjectListener;
 import org.openscience.cdk.interfaces.IElement;
+import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 
@@ -84,14 +84,14 @@ public class DebugAtom extends Atom implements IAtom {
 		return super.getCharge();
 	}
 
-	public void setHydrogenCount(Integer hydrogenCount) {
+	public void setImplicitHydrogenCount(Integer hydrogenCount) {
 		logger.debug("Setting hydrogen count: ", hydrogenCount);
-		super.setHydrogenCount(hydrogenCount);
+		super.setImplicitHydrogenCount(hydrogenCount);
 	}
 
-	public Integer getHydrogenCount() {
-		logger.debug("Getting hydrogen count: ", super.getHydrogenCount());
-		return super.getHydrogenCount();
+	public Integer getImplicitHydrogenCount() {
+		logger.debug("Getting hydrogen count: ", super.getImplicitHydrogenCount());
+		return super.getImplicitHydrogenCount();
 	}
 
 	public void setPoint2d(Point2d point2d) {
@@ -377,8 +377,8 @@ public class DebugAtom extends Atom implements IAtom {
         return clone;
 	}
 
-	public IChemObjectBuilder getBuilder() {
-		return DebugChemObjectBuilder.getInstance();
-	}
+    public IChemObjectBuilder getBuilder() {
+        return DebugChemObjectBuilder.getInstance();
+    }
 
 }

@@ -1,9 +1,5 @@
-/*  $RCSfile$
- *  $Author$
- *  $Date$
- *  $Revision$
- *
- *  Copyright (C) 2004-2007  The Chemistry Development Kit (CDK) project
+/* Copyright (C) 2004-2007  Matteo Floris <mfe4@users.sf.net>
+ *                    2010  Egon Willighagen <egonw@users.sf.net>
  *
  *  Contact: cdk-devel@lists.sourceforge.net
  *
@@ -45,9 +41,7 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
  * Further information is given in   
  * Wiener path number: half the sum of all the distance matrix entries; Wiener
  * polarity number: half the sum of all the distance matrix entries with a
- * value of 3. For more information see Todeschini R, Consonni V, Handbook of Molecular
- * Descriptors, In: Mannhold R, Kubinyi H, Timmermann H (Eds.), Methods and Principles in 
- * Medicinal Chemistry, Vol. 11, Wiley-VCH 2000, Weinheim, New York.
+ * value of 3. For more information see {@cdk.cite Wiener1947,TOD2000}.
  * <p>
  * This descriptor uses no parameters.
  * <p>
@@ -60,19 +54,7 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
  * <li>WPOL - weiner polarity number
  * </ol>
  * 
- * <p>This descriptor uses these parameters:
- * <table border="1">
- *   <tr>
- *     <td>Name</td>
- *     <td>Default</td>
- *     <td>Description</td>
- *   </tr>
- *   <tr>
- *     <td></td>
- *     <td></td>
- *     <td>no parameters</td>
- *   </tr>
- * </table>
+ * <p>This descriptor does not have any parameters.
  * 
  * @author         mfe4
  * @cdk.created        December 7, 2004

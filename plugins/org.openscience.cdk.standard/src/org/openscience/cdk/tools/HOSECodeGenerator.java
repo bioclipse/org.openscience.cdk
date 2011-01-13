@@ -41,9 +41,9 @@ import org.openscience.cdk.graph.invariant.CanonicalLabeler;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
-import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IIsotope;
 import org.openscience.cdk.interfaces.IMolecule;
+import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IRing;
 import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.ringsearch.SSSRFinder;
@@ -300,7 +300,7 @@ public class HOSECodeGenerator implements java.io.Serializable
 	{
 		int partnerCount = 0;
 		partnerCount = atomContainer.getConnectedBondsCount(root) +
-                (root.getHydrogenCount() == CDKConstants.UNSET ? 0 : root.getHydrogenCount()); 
+                (root.getImplicitHydrogenCount() == CDKConstants.UNSET ? 0 : root.getImplicitHydrogenCount()); 
 		centerCode = root.getSymbol() + "-" + partnerCount + createChargeCode(root)+(ringsize ? getRingcode(root, ac) : "" )+";";
 	}
 	

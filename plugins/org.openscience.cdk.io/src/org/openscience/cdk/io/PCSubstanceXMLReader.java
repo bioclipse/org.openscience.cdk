@@ -34,8 +34,8 @@ import org.openscience.cdk.annotations.TestClass;
 import org.openscience.cdk.annotations.TestMethod;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IChemObject;
-import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecule;
+import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.io.formats.IResourceFormat;
 import org.openscience.cdk.io.formats.PubChemSubstanceXMLFormat;
 import org.openscience.cdk.io.pubchemxml.PubChemXMLHelper;
@@ -113,12 +113,12 @@ public class PCSubstanceXMLReader extends DefaultChemObjectReader {
 		return false;
 	}
 
-    public IChemObject read(IChemObject object) throws CDKException {        
+	public <T extends IChemObject> T read(T object) throws CDKException {
         if (object instanceof IMolecule) {
         	try {
             	parserHelper = new PubChemXMLHelper(object.getBuilder());
             	builder = object.getBuilder();
-        		return readMolecule();
+        		return (T)readMolecule();
         	} catch (IOException e) {
         		throw new CDKException("An IO Exception occured while reading the file.", e);
         	} catch (CDKException e) {

@@ -1,6 +1,4 @@
-/* $Revision$ $Author$ $Date$
- *
- *  Copyright (C) 2003-2005  Christoph Steinbeck
+/*  Copyright (C) 2003-2005  Christoph Steinbeck
  *                2003-2008  Egon Willighagen
  *                           Stefan Kuhn
  *                           Rajarshi Guha
@@ -28,6 +26,7 @@
 package org.openscience.cdk.layout;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -37,14 +36,16 @@ import java.util.List;
 import javax.vecmath.Point2d;
 
 import org.openscience.cdk.CDKConstants;
+import org.openscience.cdk.annotations.TestClass;
+import org.openscience.cdk.annotations.TestMethod;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IChemFile;
-import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecule;
+import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.io.CMLReader;
 import org.openscience.cdk.isomorphism.UniversalIsomorphismTester;
 import org.openscience.cdk.isomorphism.mcss.RMap;
@@ -66,6 +67,7 @@ import org.openscience.cdk.tools.manipulator.ChemFileManipulator;
  * @cdk.module   sdg
  * @cdk.githash
  */
+@TestClass("org.openscience.cdk.layout.TemplateHandlerTest")
 public class TemplateHandler
 {
 
@@ -78,6 +80,7 @@ public class TemplateHandler
 	/**
 	 * Creates a new TemplateHandler.
 	 */
+	@TestMethod("testInit")
 	public TemplateHandler(IChemObjectBuilder builder)
 	{
 		templates = new ArrayList<IAtomContainer>();
@@ -90,6 +93,7 @@ public class TemplateHandler
 	 * SDG, place a drawing with the new template in org/openscience/cdk/layout/templates and add the
 	 * template filename to org/openscience/cdk/layout/templates/template.list
 	 */
+	@TestMethod("testInit")
 	public void loadTemplates(IChemObjectBuilder builder)
 	{
 		String line = null;
@@ -101,20 +105,27 @@ public class TemplateHandler
 					line = reader.readLine();
 					line = "org/openscience/cdk/layout/templates/" + line;
 					logger.debug("Attempting to read template ", line);
+				try {
 					CMLReader structureReader = new CMLReader(
 						this.getClass().getClassLoader().getResourceAsStream(line)
 					);
-					IChemFile file = (IChemFile) structureReader.read(builder.newChemFile());
+					IChemFile file = (IChemFile) structureReader.read(builder.newInstance(IChemFile.class));
 					List<IAtomContainer> files = ChemFileManipulator.getAllAtomContainers(file);
 					for (int i = 0; i < files.size(); i++)
 						templates.add(files.get(i));
 					logger.debug("Successfully read template ", line);
+				} catch (CDKException cdke) {
+				    logger.warn("Could not read template ", line, ", reason: ", cdke.getMessage());
+				    logger.debug(cdke);
+				} catch (IllegalArgumentException iae) {
+				    logger.warn("Could not read template ", line, ", reason: ", iae.getMessage());
+				    logger.debug(iae);
+				}
+
 			}
-		} catch (Exception exc) {
-			logger.debug("Could not read templates");
-			System.out.println("Reason: " + exc.getMessage());
-			exc.printStackTrace();
-			logger.debug(exc);
+		} catch (IOException ioe) {
+		    logger.warn("Could not read (all of the) templates, reason: ", ioe.getMessage());
+		    logger.debug(ioe);
 		}
 	}
 
@@ -123,18 +134,20 @@ public class TemplateHandler
 	 *
 	 * @param  molecule  The molecule to be added to the TemplateHandler
 	 */
+	@TestMethod("testAddMolecule")
 	public void addMolecule(IAtomContainer molecule) {
 		templates.add(molecule);
 	}
-	
+
+	@TestMethod("testRemoveMolecule")
 	public IAtomContainer removeMolecule(IAtomContainer molecule) throws CDKException {
-		IAtomContainer ac1 = molecule.getBuilder().newAtomContainer(molecule);
+		IAtomContainer ac1 = molecule.getBuilder().newInstance(IAtomContainer.class,molecule);
 		IAtomContainer ac2 = null;
 		IAtomContainer mol2 = null;
 		for (int f = 0; f < templates.size(); f++)
 		{
 			mol2 = templates.get(f);
-			ac2 = molecule.getBuilder().newAtomContainer(mol2);
+			ac2 = molecule.getBuilder().newInstance(IAtomContainer.class,mol2);
 			if (UniversalIsomorphismTester.isIsomorph(ac1, ac2)) {
 				templates.remove(f);
 				return mol2;
@@ -165,8 +178,8 @@ public class TemplateHandler
 			if (UniversalIsomorphismTester.isIsomorph(molecule, template))
 			{
 				List<RMap> list = UniversalIsomorphismTester.getIsomorphAtomsMap(
-					molecule.getBuilder().newAtomContainer(molecule), 
-					molecule.getBuilder().newAtomContainer(template)
+					molecule.getBuilder().newInstance(IAtomContainer.class,molecule), 
+					molecule.getBuilder().newInstance(IAtomContainer.class,template)
 				);
 				logger.debug("Found a subgraph mapping of size " + list.size() + ", template: " + template.getID());
 				for (int i = 0; i < list.size(); i++)
@@ -194,6 +207,7 @@ public class TemplateHandler
 	 * @param  molecule  The molecule to be check for potential templates
 	 * @return           True if there was a possible mapping
 	 */
+	@TestMethod("testRemoveMolecule")
 	public boolean mapTemplates(IAtomContainer molecule) throws CDKException {
 				logger.debug("Trying to map a molecule...");
 		boolean mapped = false;
@@ -207,8 +221,8 @@ public class TemplateHandler
 			if (UniversalIsomorphismTester.isSubgraph(molecule, template))
 			{
 				List listOfLists = UniversalIsomorphismTester.getSubgraphAtomsMaps(
-						molecule.getBuilder().newAtomContainer(molecule), 
-						molecule.getBuilder().newAtomContainer(template)
+						molecule.getBuilder().newInstance(IAtomContainer.class,molecule), 
+						molecule.getBuilder().newInstance(IAtomContainer.class,template)
 				);
 				logger.debug("Found " + listOfLists.size() + " subgraphs matching template: " + template.getID());
 				for (Iterator listOfListsIterator = listOfLists.iterator(); listOfListsIterator.hasNext(); ) {
@@ -237,6 +251,7 @@ public class TemplateHandler
 	 *
 	 *@return    The templateCount value
 	 */
+	@TestMethod("testInit")
 	public int getTemplateCount()
 	{
 		return templates.size();
@@ -265,23 +280,25 @@ public class TemplateHandler
 	 *                   the molecule
 	 * @throws CDKException if an error occurs
 	 */
+	@TestMethod("getMappedSubstructures_IAtomContainer")
 	public IAtomContainerSet getMappedSubstructures(IAtomContainer molecule) throws CDKException {
 		logger.debug("Trying get mapped substructures...");
-		IAtomContainerSet matchedSubstructures = molecule.getBuilder().newAtomContainerSet();
+		IAtomContainerSet matchedSubstructures =
+		    molecule.getBuilder().newInstance(IAtomContainerSet.class);
 		for (int f = 0; f < templates.size(); f++)
 		{
 			IAtomContainer template = templates.get(f);
 			if (UniversalIsomorphismTester.isSubgraph(molecule, template))
 			{
 				List listOfLists = UniversalIsomorphismTester.getSubgraphAtomsMaps(
-						molecule.getBuilder().newAtomContainer(molecule), 
-						molecule.getBuilder().newAtomContainer(template)
+						molecule.getBuilder().newInstance(IAtomContainer.class,molecule), 
+						molecule.getBuilder().newInstance(IAtomContainer.class,template)
 				);
 				logger.debug("Found " + listOfLists.size() + " subgraphs matching template: " + template.getID());
 				for (Iterator listOfListsIterator = listOfLists.iterator(); listOfListsIterator.hasNext(); ) {
 					List list = (List) listOfListsIterator.next();
 					logger.debug("Found a subgraph mapping of size " + list.size() + ", template: " + template.getID());
-					IAtomContainer matchedSubstructure = molecule.getBuilder().newAtomContainer();
+					IAtomContainer matchedSubstructure = molecule.getBuilder().newInstance(IAtomContainer.class);
 					for (Iterator listIterator = list.iterator(); listIterator.hasNext(); )
 					{
 						RMap map = (RMap) listIterator.next();

@@ -24,13 +24,13 @@
  */
 package org.openscience.cdk;
 
-import java.io.Serializable;
+import org.openscience.cdk.interfaces.IAtom;
+import org.openscience.cdk.interfaces.IElement;
+import org.openscience.cdk.tools.periodictable.PeriodicTable;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
-
-import org.openscience.cdk.interfaces.IAtom;
-import org.openscience.cdk.interfaces.IElement;
+import java.io.Serializable;
 
 /**
  * Represents the idea of an chemical atom.
@@ -44,7 +44,7 @@ import org.openscience.cdk.interfaces.IElement;
  * to the constructor are null. Atoms can be configured by using
  * the IsotopeFactory.configure() method:
  * <pre>
- *   IsotopeFactory if = IsotopeFactory.getInstance(a.getBuilder());
+ *   IsotopeFactory if = IsotopeFactory.getInstance(a.getNewBuilder());
  *   if.configure(a);
  * </pre>
  *
@@ -119,7 +119,8 @@ public class Atom extends AtomType implements IAtom, Serializable, Cloneable  {
      * @param elementSymbol The String describing the element for the Atom
      */
     public Atom(String elementSymbol) {
-        super(elementSymbol);      
+        this(new Element(elementSymbol, PeriodicTable.getAtomicNumber(elementSymbol)));
+        this.formalCharge = 0;
     }
 
     /**
@@ -178,7 +179,7 @@ public class Atom extends AtomType implements IAtom, Serializable, Cloneable  {
                 } else {
                     this.fractionalPoint3d = null;
                 }
-    			this.hydrogenCount = ((IAtom)element).getHydrogenCount();
+    			this.hydrogenCount = ((IAtom)element).getImplicitHydrogenCount();
     			this.charge = ((IAtom)element).getCharge();
     			this.stereoParity = ((IAtom)element).getStereoParity();
     		}
@@ -214,9 +215,9 @@ public class Atom extends AtomType implements IAtom, Serializable, Cloneable  {
          *
          * @param  hydrogenCount  The number of hydrogen atoms bonded to this atom.
          *
-         * @see    #getHydrogenCount
+         * @see    #getImplicitHydrogenCount
          */
-        public void setHydrogenCount(Integer hydrogenCount) {
+        public void setImplicitHydrogenCount(Integer hydrogenCount) {
         	this.hydrogenCount = hydrogenCount;
         	notifyChanged();
         }
@@ -226,9 +227,9 @@ public class Atom extends AtomType implements IAtom, Serializable, Cloneable  {
          *
          * @return    The hydrogen count of this atom.
          *
-         * @see       #setHydrogenCount
+         * @see       #setImplicitHydrogenCount
          */
-        public Integer getHydrogenCount() {
+        public Integer getImplicitHydrogenCount() {
         	return this.hydrogenCount;
         }
 
@@ -370,8 +371,8 @@ public class Atom extends AtomType implements IAtom, Serializable, Cloneable  {
                 if (getSymbol() != null) {
                 	stringContent.append(", S:").append(getSymbol());
                 }
-                if (getHydrogenCount() != null) {
-                	stringContent.append(", H:").append(getHydrogenCount());
+                if (getImplicitHydrogenCount() != null) {
+                	stringContent.append(", H:").append(getImplicitHydrogenCount());
                 }
                 if (getStereoParity() != null) {
                 	stringContent.append(", SP:").append(getStereoParity());

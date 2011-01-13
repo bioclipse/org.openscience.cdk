@@ -105,6 +105,7 @@ public class LoggingTool implements ILoggingTool {
      * Constructs a LoggingTool which produces log lines without any special
      * indication which class the message originates from.
      */
+    @TestMethod("testLoggingTool")
     public LoggingTool() {
         this(LoggingTool.class);
     }
@@ -115,6 +116,7 @@ public class LoggingTool implements ILoggingTool {
      *
      * @param object Object from which the log messages originate
      */
+    @TestMethod("testLoggingTool_Object")
     public LoggingTool(Object object) {
         this(object.getClass());
     }
@@ -125,6 +127,7 @@ public class LoggingTool implements ILoggingTool {
      *
      * @param classInst Class from which the log messages originate
      */
+    @TestMethod("testLoggingTool_Class")
     public LoggingTool(Class<?> classInst) {
         LoggingTool.logger = this;
         stackLength = DEFAULT_STACK_LENGTH;
@@ -141,7 +144,7 @@ public class LoggingTool implements ILoggingTool {
             toSTDOUT = true;
             logger.debug("Unknown error occured: ", e.getMessage());
         }
-        /****************************************************************
+        /* **************************************************************
          * but some JVMs (i.e. MSFT) won't pass the SecurityException to
          * this exception handler. So we are going to check the JVM
          * version first

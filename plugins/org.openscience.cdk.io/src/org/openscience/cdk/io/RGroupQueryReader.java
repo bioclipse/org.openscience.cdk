@@ -159,9 +159,9 @@ public class RGroupQueryReader extends DefaultChemObjectReader {
      * @return IChemObject read from file
      * @param object class must be of type RGroupQuery
      */
-    public IChemObject read(IChemObject object) throws CDKException {
+    public <T extends IChemObject> T read(T object) throws CDKException {
         if (object instanceof RGroupQuery) {
-            return parseRGFile((RGroupQuery)object);
+            return (T)parseRGFile((RGroupQuery)object);
         } else {
             throw new CDKException
                ("Reader only supports "+RGroupQuery.class.getName()+" objects");
@@ -253,7 +253,7 @@ public class RGroupQueryReader extends DefaultChemObjectReader {
 
             //Let MDL reader process $CTAB block of the root structure.
             MDLV2000Reader reader = new MDLV2000Reader(new StringReader(rootStr), ISimpleChemObjectReader.Mode.STRICT);
-            IMolecule root = (IMolecule)reader.read(rGroupQuery.getBuilder().newMolecule());
+            IMolecule root = (IMolecule)reader.read(rGroupQuery.getBuilder().newInstance(IMolecule.class));
             rGroupQuery.setRootStructure(root);
             List<IAtom> atomsByLinePosition = reader.getAtomsByLinePosition();
 
@@ -376,7 +376,7 @@ public class RGroupQueryReader extends DefaultChemObjectReader {
                     String groupStr = sb.toString();
                     reader = new MDLV2000Reader
                         (new StringReader(groupStr), ISimpleChemObjectReader.Mode.STRICT);
-                    IMolecule group = (IMolecule)reader.read(rGroupQuery.getBuilder().newMolecule());
+                    IMolecule group = (IMolecule)reader.read(rGroupQuery.getBuilder().newInstance(IMolecule.class));
                     atomsByLinePosition = reader.getAtomsByLinePosition();
                     RGroup rGroup = new RGroup();
                     rGroup.setGroup(group);

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CDK plugin
 Bundle-SymbolicName: org.openscience.cdk.standard;singleton:=true
-Bundle-Version: 1.3.4
+Bundle-Version: 1.3.8
 Bundle-Vendor: The Chemistry Development Kit Project
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.openscience.cdk.standard.Activator
@@ -13,31 +13,30 @@ Require-Bundle: org.openscience.cdk.annotation,
  javax.vecmath,
  org.3pq.jgrapht,
  org.eclipse.core.runtime
-Export-Package: org.openscience.cdk.graph,
+Export-Package: org.openscience.cdk.dict,
+ org.openscience.cdk.smiles,
+ org.openscience.cdk.isomorphism.mcss,
+ org.openscience.cdk.isomorphism,
+ org.openscience.cdk.exception,
+ org.openscience.cdk.graph,
  org.openscience.cdk.graph.rebond,
  org.openscience.cdk.graph.matrix,
  org.openscience.cdk.graph.invariant,
- org.openscience.cdk.ringsearch,
+ org.openscience.cdk.aromaticity,
+ org.openscience.cdk.libio.cml,
+ org.openscience.cdk,
  org.openscience.cdk.ringsearch.cyclebasis,
- org.openscience.cdk.event,
+ org.openscience.cdk.ringsearch,
+ org.openscience.cdk.stereo,
+ org.openscience.cdk.math,
+ org.openscience.cdk.validate,
  org.openscience.cdk.geometry,
+ org.openscience.cdk.config.fragments,
+ org.openscience.cdk.fingerprint,
+ org.openscience.cdk.event,
  org.openscience.cdk.tools,
  org.openscience.cdk.tools.manipulator,
- org.openscience.cdk.tools.periodictable,
- org.openscience.cdk,
- org.openscience.cdk.math,
- org.openscience.cdk.fingerprint,
- org.openscience.cdk.aromaticity,
- org.openscience.cdk.isomorphism.mcss,
- org.openscience.cdk.isomorphism,
- org.openscience.cdk.dict,
- org.openscience.cdk.smiles,
- org.openscience.cdk.config.fragments,
  org.openscience.cdk.atomtype,
- org.openscience.cdk.validate,
- org.openscience.cdk.exception,
  org.openscience.cdk.qsar,
  org.openscience.cdk.qsar.result,
- org.openscience.cdk.libio.cml,
- org.openscience.cdk.config.data,
  org.openscience.cdk.standard

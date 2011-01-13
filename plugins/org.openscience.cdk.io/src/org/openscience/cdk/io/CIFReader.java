@@ -137,7 +137,7 @@ public class CIFReader extends DefaultChemObjectReader {
      *
      * @return the content in a ChemFile object
      */
-    public IChemObject read(IChemObject object) throws CDKException {
+    public <T extends IChemObject> T read(T object) throws CDKException {
         if (object instanceof IChemFile) {
             IChemFile cf = (IChemFile)object;
             try {
@@ -145,7 +145,7 @@ public class CIFReader extends DefaultChemObjectReader {
             } catch (IOException e) {
                 logger.error("Input/Output error while reading from input.");
             }
-            return cf;
+            return (T)cf;
         } else {
             throw new CDKException("Only supported is reading of ChemFile.");
         }
@@ -158,9 +158,9 @@ public class CIFReader extends DefaultChemObjectReader {
      * @return a ChemFile with the coordinates, charges, vectors, etc.
      */
     private IChemFile readChemFile(IChemFile file) throws IOException {
-        IChemSequence seq = file.getBuilder().newChemSequence();
-        IChemModel model = file.getBuilder().newChemModel();
-        crystal = file.getBuilder().newCrystal();
+        IChemSequence seq = file.getBuilder().newInstance(IChemSequence.class);
+        IChemModel model = file.getBuilder().newInstance(IChemModel.class);
+        crystal = file.getBuilder().newInstance(ICrystal.class);
 
         String line = input.readLine();
         boolean end_found = false;
@@ -351,7 +351,7 @@ public class CIFReader extends DefaultChemObjectReader {
                 }
                 int colIndex = 0;
                 // process one row
-                IAtom atom = crystal.getBuilder().newAtom("C");
+                IAtom atom = crystal.getBuilder().newInstance(IAtom.class,"C");
                 Point3d frac = new Point3d();
                 Point3d real = new Point3d();
                 boolean hasFractional = false;

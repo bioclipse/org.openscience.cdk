@@ -562,6 +562,11 @@ public class CDKAtomTypeMatcher implements IAtomTypeMatcher {
                 }
                 // but an sp2 hyb N might N.sp2 or N.planar3 (pyrrole), so check for the latter
             	int neighborCount = atomContainer.getConnectedAtomsCount(atom);
+            	if (neighborCount == 4 &&
+            	    IBond.Order.DOUBLE == atomContainer.getMaximumBondOrder(atom)) {
+            	    IAtomType type = getAtomType("N.oxide");
+                    if (isAcceptable(atom, atomContainer, type)) return type;
+            	} else
             	if (neighborCount > 1 && bothNeighborsAreSp2(atom, atomContainer)) {
             		IRing ring = getRing(atom, atomContainer);
             		int ringSize = ring == null ? 0 : ring.getAtomCount();
@@ -578,7 +583,7 @@ public class CDKAtomTypeMatcher implements IAtomTypeMatcher {
             			} else if (neighborCount == 2) {
             				IBond.Order maxOrder = atomContainer.getMaximumBondOrder(atom);
             				if (maxOrder == IBond.Order.SINGLE) {
-            				    if (atom.getHydrogenCount() != CDKConstants.UNSET && atom.getHydrogenCount() == 1) {
+            				    if (atom.getImplicitHydrogenCount() != CDKConstants.UNSET && atom.getImplicitHydrogenCount() == 1) {
             						IAtomType type = getAtomType("N.planar3");
             						if (isAcceptable(atom, atomContainer, type)) return type;
             					} else {
@@ -654,7 +659,11 @@ public class CDKAtomTypeMatcher implements IAtomTypeMatcher {
                 }
             }
         } else if (atomContainer.getConnectedBondsCount(atom) > 3) {
-            // FIXME: I don't perceive carbons with more than 3 connections yet
+            if (atomContainer.getConnectedBondsCount(atom) == 4 &&
+                countAttachedDoubleBonds(atomContainer, atom) == 1) {
+                IAtomType type = getAtomType("N.oxide");
+                if (isAcceptable(atom, atomContainer, type)) return type;
+            }
             return null;
         } else if (atomContainer.getConnectedBondsCount(atom) == 0) {
             IAtomType type = getAtomType("N.sp3");
@@ -675,7 +684,7 @@ public class CDKAtomTypeMatcher implements IAtomTypeMatcher {
                 	List<IBond> bonds = atomContainer.getConnectedBondsList(atom);
                     if (bonds.get(0).getFlag(CDKConstants.ISAROMATIC) &&
                             bonds.get(1).getFlag(CDKConstants.ISAROMATIC)) {
-                        Integer hCount = atom.getHydrogenCount();
+                        Integer hCount = atom.getImplicitHydrogenCount();
                         if (hCount == CDKConstants.UNSET || hCount == 0) {
                             IAtomType type = getAtomType("N.sp2");
                             if (isAcceptable(atom, atomContainer, type))
@@ -877,6 +886,12 @@ public class CDKAtomTypeMatcher implements IAtomTypeMatcher {
                 IAtomType type = getAtomType("S.onyl");
                 if (isAcceptable(atom, atomContainer, type)) return type;
             }
+            int doubleBondedSulphurs = countAttachedDoubleBonds(atomContainer, atom, "S");
+            if (doubleBondedSulphurs == 1 &&
+                doubleBondedOxygens == 1) {
+                IAtomType type = getAtomType("S.thionyl");
+                if (isAcceptable(atom, atomContainer, type)) return type;
+            }
             IBond.Order maxBondOrder = atomContainer.getMaximumBondOrder(atom);
             if (maxBondOrder == CDKConstants.BONDORDER_SINGLE) {
                 IAtomType type = getAtomType("S.anyl");
@@ -898,8 +913,14 @@ public class CDKAtomTypeMatcher implements IAtomTypeMatcher {
             // no idea how to deal with this yet
             return null;
         } else if (neighborcount == 3) {
-            IAtomType type = getAtomType("P.ine");
-            if (isAcceptable(atom, atomContainer, type)) return type;
+            if (atom.getFormalCharge() != null &
+                atom.getFormalCharge().intValue() == 1) {
+                IAtomType type = getAtomType("P.anium");
+                if (isAcceptable(atom, atomContainer, type)) return type;
+            } else {
+                IAtomType type = getAtomType("P.ine");
+                if (isAcceptable(atom, atomContainer, type)) return type;
+            }
         } else if (neighborcount == 2) {
             if (maxBondOrder == CDKConstants.BONDORDER_DOUBLE) {
                 IAtomType type = getAtomType("P.irane");
@@ -1505,12 +1526,15 @@ public class CDKAtomTypeMatcher implements IAtomTypeMatcher {
     	int neighborcount = neighbors.size();
     	int doubleBondedAtoms = 0;
     	for (int i=neighborcount-1;i>=0;i--) {
-    		if (neighbors.get(i).getOrder() == CDKConstants.BONDORDER_DOUBLE) {
-    			IBond bond =  neighbors.get(i);
+            IBond bond =  neighbors.get(i);
+    		if (bond.getOrder() == CDKConstants.BONDORDER_DOUBLE) {
     			if (bond.getAtomCount() == 2 && bond.contains(atom)) {
     				if (symbol != null) {
-    					if (bond.getAtom(0).getSymbol().equals(symbol) ||
-    							bond.getAtom(1).getSymbol().equals(symbol)) {
+    				    // if other atom is a sulphur
+    					if ((bond.getAtom(0) != atom &&
+    					     bond.getAtom(0).getSymbol().equals(symbol)) ||
+    						(bond.getAtom(1) != atom &&
+    						 bond.getAtom(1).getSymbol().equals(symbol))) {
     						doubleBondedAtoms++;
     					}
     				} else {
@@ -1536,10 +1560,10 @@ public class CDKAtomTypeMatcher implements IAtomTypeMatcher {
     		int requiredContainerCount = type.getFormalNeighbourCount();
     		if (actualContainerCount != requiredContainerCount)
     			return false;
-    	} else if (atom.getHydrogenCount() != CDKConstants.UNSET) {
+    	} else if (atom.getImplicitHydrogenCount() != CDKConstants.UNSET) {
     		// confirm correct neighbour count
     		int connectedAtoms = container.getConnectedAtomsCount(atom);
-    		int hCount = atom.getHydrogenCount();
+    		int hCount = atom.getImplicitHydrogenCount();
     		int actualNeighbourCount =  connectedAtoms + hCount;
     		int requiredNeighbourCount = type.getFormalNeighbourCount();
     		if (actualNeighbourCount > requiredNeighbourCount)
@@ -1555,7 +1579,8 @@ public class CDKAtomTypeMatcher implements IAtomTypeMatcher {
     		return false;
 
     	// confirm correct formal charge
-    	if (atom.getFormalCharge() != CDKConstants.UNSET && atom.getFormalCharge() != type.getFormalCharge())
+        if (atom.getFormalCharge() != CDKConstants.UNSET &&
+            !atom.getFormalCharge().equals(type.getFormalCharge()))
     		return false;
 
     	return true;

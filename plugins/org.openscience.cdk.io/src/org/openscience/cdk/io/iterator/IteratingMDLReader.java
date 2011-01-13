@@ -35,8 +35,8 @@ import java.util.NoSuchElementException;
 import org.openscience.cdk.annotations.TestMethod;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IChemObject;
-import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecule;
+import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.io.ISimpleChemObjectReader;
 import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.io.ReaderFactory;
@@ -63,7 +63,7 @@ import org.openscience.cdk.tools.LoggingToolFactory;
  * <pre>
  * File sdfFile = new File("../zinc-structures/ZINC_subset3_3D_charged_wH_maxmin1000.sdf");
  * IteratingMDLReader reader = new IteratingMDLReader(
- *   new FileInputStream(sdfFile), DefaultChemObjectBuilder.getInstance()
+ *   new FileInputStream(sdfFile), NewDefaultChemObjectBuilder.getInstance()
  * );
  * while (reader.hasNext()) {
  *   IMolecule molecule = (IMolecule)reader.next();
@@ -134,19 +134,16 @@ public class IteratingMDLReader extends DefaultIteratingChemObjectReader impleme
             
             // now try to parse the next Molecule
             try {
-                if (input.ready()) {
+                if ((currentLine = input.readLine()) != null) {
                 	currentFormat = (IChemFormat)MDLFormat.getInstance();
-                    currentLine = input.readLine();
                     StringBuffer buffer = new StringBuffer();
                     while (currentLine != null && !currentLine.equals("M  END")) {
                         // still in a molecule
                         buffer.append(currentLine);
                         buffer.append(System.getProperty("line.separator"));
-                        if (input.ready()) {
-                            currentLine = input.readLine();
-                        } else {
-                            currentLine = null;
-                        }
+
+                        currentLine = input.readLine();
+
                         // do MDL molfile version checking
                         if (currentLine.contains("V2000") || currentLine.contains("v2000")) {
                         	currentFormat = (IChemFormat)MDLV2000Format.getInstance();
@@ -163,7 +160,7 @@ public class IteratingMDLReader extends DefaultIteratingChemObjectReader impleme
                         reader.addChemObjectIOListener(this);
                         ((MDLV2000Reader)reader).customizeJob();
                     }
-                    nextMolecule = (IMolecule)reader.read(builder.newMolecule());
+                    nextMolecule = (IMolecule)reader.read(builder.newInstance(IMolecule.class));
 
                     // note that a molecule may have 0 atoms, but still
                     // be useful (by having SD tags for example), so just
