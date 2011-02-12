@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Signatures
+Bundle-SymbolicName: signatures;singleton:=true
+Bundle-Version: 1.0
+Bundle-Vendor: https://github.com/gilleain/signatures
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: jar/signatures-1.0.jar
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Export-Package: signature.chemistry,
+ signature.display,
+ signature.simple
