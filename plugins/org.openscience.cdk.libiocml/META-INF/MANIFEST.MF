@@ -16,9 +16,10 @@ Require-Bundle: org.openscience.cdk.annotation,
  org.openscience.cdk.standard,
  org.openscience.cdk.formula,
  javax.vecmath,
- net.bioclipse.xom,
- org.xmlcml.cmlxom,
  org.eclipse.core.runtime
+Import-Package: nu.xom,
+ org.xmlcml.cml.base,
+ org.xmlcml.cml.element
 Export-Package: org.openscience.cdk.libio.cml,
  org.openscience.cdk.io,
  org.openscience.cdk.io.cml,
