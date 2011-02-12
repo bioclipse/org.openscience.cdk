@@ -58,6 +58,7 @@ public class OWLAtomTypeHandler extends DefaultHandler {
      * 
      * @param build The IChemObjectBuilder used to create the IAtomType's.
      */
+    @TestMethod("testAtomTypeHandler_IChemObjectBuilder")
     public OWLAtomTypeHandler(IChemObjectBuilder build) {
         builder = build;
     }
@@ -116,7 +117,7 @@ public class OWLAtomTypeHandler extends DefaultHandler {
 
 	private void startAtomTypeElement(String local, Attributes atts) {
     	if ("AtomType".equals(local)) {
-    		currentAtomType = builder.newAtomType("H");
+    		currentAtomType = builder.newInstance(IAtomType.class, "H");
     		currentAtomType.setAtomTypeName(atts.getValue("rdf:ID"));
     	} else if ("hasElement".equals(local)) {
     		String attrValue = atts.getValue("rdf:resource");

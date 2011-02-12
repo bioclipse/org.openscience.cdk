@@ -252,6 +252,26 @@
 
     <!-- the facts: Algorithms -->
 
+    <Descriptor rdf:ID="acidicGroupCount">
+        <rdfs:label>Acidic Group Count</rdfs:label>
+        <annotation>
+            <documentation>
+                <dc:contributor rdf:resource="#elw"/>
+                <dc:date>2010-09-23</dc:date>
+            </documentation>
+        </annotation>
+        <definition rdf:parseType='Literal'>
+            Returns the number of acidic groups.
+        </definition>
+        <description rdf:parseType='Literal'>
+            The list of acidic group types is defined by these
+            SMARTS: "$([O;H1]-[C,S,P]=O)", "$([*;-;!$(*~[*;+])])", and
+            "$([NH](S(=O)=O)C(F)(F)F)".
+        </description>
+        <isClassifiedAs rdf:resource="#molecularDescriptor"/>
+        <isClassifiedAs rdf:resource="#constitutionalDescriptor"/>
+    </Descriptor>
+
     <Descriptor rdf:ID="aminoAcidsCount">
         <rdfs:label>Amino Acid Count</rdfs:label>
         <annotation>
@@ -405,6 +425,27 @@
             .
         </description>
         <isClassifiedAs rdf:resource="#electronicDescriptor"/>
+    </Descriptor>
+
+    <Descriptor rdf:ID="basicGroupCount">
+        <rdfs:label>Basic Group Count</rdfs:label>
+        <annotation>
+            <documentation>
+                <dc:contributor rdf:resource="#elw"/>
+                <dc:date>2010-09-24</dc:date>
+            </documentation>
+        </annotation>
+        <definition rdf:parseType='Literal'>
+            Returns the number of basic groups.
+        </definition>
+        <description rdf:parseType='Literal'>
+            The list of basic group types is defined by these
+            SMARTS: "$([NH2]-[CX4])", "$([NH](-[CX4])-[CX4])",
+            "$(N(-[CX4])(-[CX4])-[CX4])", "$([*;+;!$(*~[*;-])])", "$(N=C-N)",
+            and "$(N-C=N)]".
+        </description>
+        <isClassifiedAs rdf:resource="#molecularDescriptor"/>
+        <isClassifiedAs rdf:resource="#constitutionalDescriptor"/>
     </Descriptor>
 
     <Descriptor rdf:ID="BCUT">
@@ -1071,6 +1112,27 @@
 
     </Descriptor>
 
+     <Descriptor rdf:ID="fmf">
+        <rdfs:label>FMF</rdfs:label>
+        <annotation>
+            <documentation>
+                <dc:contributor rdf:resource="#rguha"/>
+                <dc:date>2004-11-24</dc:date>
+            </documentation>
+        </annotation>
+        <definition rdf:parseType='Literal'>
+            Descriptor characterizing molecular complexity in terms of its Murcko framework
+        </definition>
+        <description rdf:parseType='Literal'>
+            This descriptor is described by Yang et al
+            <bibtex:cite ref="YANG2010"/> and is the ratio of heavy atoms in the Murcko
+            framework of a molecule to the total number of heavy atoms in the molecule.
+        </description>
+        <isClassifiedAs rdf:resource="#topologicalDescriptor"/>
+        <isClassifiedAs rdf:resource="#molecularDescriptor"/>
+
+    </Descriptor>
+
     <Descriptor rdf:ID="gravitationalIndex_SquareAndCubeRoots">
         <rdfs:label>Gravitational Index (Square and Cube Roots)</rdfs:label>
         <annotation>
@@ -1493,6 +1555,7 @@
             ref="Mannhold2009"/>.
         </definition>
         <isClassifiedAs rdf:resource="#molecularDescriptor"/>
+        <isClassifiedAs rdf:resource="#constitutionalDescriptor"/>
     </Descriptor>
 
     <Descriptor rdf:ID="partialPiCharge">
@@ -2483,6 +2546,22 @@
         <description rdf:parseType='Literal'>
             This is a port of the ADAPT CTYPES routine and is a count of
             carbon atom in different hybridization states and environments
+        </description>
+        <isClassifiedAs rdf:resource="#topologicalDescriptor"/>
+        <isClassifiedAs rdf:resource="#molecularDescriptor"/>
+    </Descriptor>
+
+    <Descriptor rdf:ID="hybratio">
+        <rdfs:label>Hybridization Ratio</rdfs:label>
+        <dc:contributor rdf:resource="#rguha"/>
+        <dc:date>2010-08-31</dc:date>
+        <definition rdf:parseType='Literal'>
+            Characterizes molecular complexity in terms of carbon hybridization states.
+        </definition>
+        <description rdf:parseType='Literal'>
+            This descriptor is designed to give a simple characterization of molecular
+            complexity. A higher ratio of sp3 to sp2 carbons is indicative of more
+            branching.
         </description>
         <isClassifiedAs rdf:resource="#topologicalDescriptor"/>
         <isClassifiedAs rdf:resource="#molecularDescriptor"/>

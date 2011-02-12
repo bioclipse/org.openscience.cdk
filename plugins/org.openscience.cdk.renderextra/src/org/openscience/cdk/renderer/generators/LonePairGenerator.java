@@ -35,6 +35,7 @@ import org.openscience.cdk.renderer.elements.ElementGroup;
 import org.openscience.cdk.renderer.elements.IRenderingElement;
 import org.openscience.cdk.renderer.elements.OvalElement;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator.AtomRadius;
+import org.openscience.cdk.renderer.generators.BasicSceneGenerator.Scale;
 
 /**
  * Generate the symbols for lone pairs.
@@ -43,7 +44,7 @@ import org.openscience.cdk.renderer.generators.BasicAtomGenerator.AtomRadius;
  * @cdk.module renderextra
  *
  */
-public class LonePairGenerator implements IGenerator {
+public class LonePairGenerator implements IGenerator<IAtomContainer> {
     
     public LonePairGenerator() {}
 
@@ -58,10 +59,10 @@ public class LonePairGenerator implements IGenerator {
 
         // XXX : is this the best option?
         final double ATOM_RADIUS =
-            ((AtomRadius)model.getRenderingParameter(AtomRadius.class)).
+            ((AtomRadius)model.getParameter(AtomRadius.class)).
             getValue();
         
-        double scale = model.getScale();
+        double scale = model.getParameter(Scale.class).getValue();
         double modelAtomRadius = ATOM_RADIUS / scale;
         double modelPointRadius = SCREEN_RADIUS / scale;
         double modelSeparation = SCREEN_SEPARATION / scale;

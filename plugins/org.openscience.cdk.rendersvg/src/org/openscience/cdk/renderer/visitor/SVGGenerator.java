@@ -46,6 +46,9 @@ import org.openscience.cdk.renderer.elements.TextElement;
 import org.openscience.cdk.renderer.elements.TextGroupElement;
 import org.openscience.cdk.renderer.elements.WedgeLineElement;
 import org.openscience.cdk.renderer.font.IFontManager;
+import org.openscience.cdk.renderer.generators.BasicBondGenerator.WedgeWidth;
+import org.openscience.cdk.renderer.generators.BasicSceneGenerator.Scale;
+import org.openscience.cdk.renderer.generators.ReactionSceneGenerator.ArrowHeadWidth;
 
 /**
  * @author maclean
@@ -103,7 +106,10 @@ public class SVGGenerator implements IDrawVisitor {
         Vector2d normal = 
             new Vector2d(wedge.y1 - wedge.y2, wedge.x2 - wedge.x1);
         normal.normalize();
-        normal.scale(rendererModel.getWedgeWidth() / rendererModel.getScale());  
+        normal.scale(
+            rendererModel.getParameter(WedgeWidth.class).getValue() /
+        	rendererModel.getParameter(Scale.class).getValue()
+        );  
         
         // make the triangle corners
         Point2d vertexA = new Point2d(wedge.x1, wedge.y1);
@@ -201,7 +207,7 @@ public class SVGGenerator implements IDrawVisitor {
 
 	public void visit(AtomSymbolElement atomSymbol) {
 		newline();
-		int[] p = transformPoint(atomSymbol.x, atomSymbol.y);
+		int[] p = transformPoint(atomSymbol.xCoord, atomSymbol.yCoord);
 		svg.append(String.format(
 				"<text x=\"%s\" y=\"%s\" style=\"fill:%s\"" +
 				">%s</text>",
@@ -225,7 +231,7 @@ public class SVGGenerator implements IDrawVisitor {
 
 	public void visit(TextElement textElement) {
 		newline();
-		int[] p = transformPoint(textElement.x, textElement.y);
+		int[] p = transformPoint(textElement.xCoord, textElement.yCoord);
 		svg.append(String.format(
 				"<text x=\"%s\" y=\"%s\">%s</text>",
 				p[0],
@@ -240,7 +246,8 @@ public class SVGGenerator implements IDrawVisitor {
 	
     public void visit(ArrowElement line) {
       
-        int w = (int) (line.width * this.rendererModel.getScale());
+        int w = (int) (line.width * 
+        	this.rendererModel.getParameter(Scale.class).getValue());
         int[] a = this.transformPoint(line.x1, line.y1);
         int[] b = this.transformPoint(line.x2, line.y2);
         newline();
@@ -252,7 +259,9 @@ public class SVGGenerator implements IDrawVisitor {
 				b[0],
 				b[1]
 				));
-        double aW = rendererModel.getArrowHeadWidth() / rendererModel.getScale();
+        double aW = rendererModel.getParameter(
+        	ArrowHeadWidth.class
+        ).getValue() / rendererModel.getParameter(Scale.class).getValue();
         if(line.direction){
 	        int[] c = this.transformPoint(line.x1-aW, line.y1-aW);
 	        int[] d = this.transformPoint(line.x1-aW, line.y1+aW);

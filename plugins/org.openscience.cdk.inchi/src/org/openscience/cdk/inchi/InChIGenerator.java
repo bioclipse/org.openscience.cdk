@@ -20,7 +20,30 @@
  */
 package org.openscience.cdk.inchi;
 
-import net.sf.jniinchi.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+
+import net.sf.jniinchi.INCHI_BOND_STEREO;
+import net.sf.jniinchi.INCHI_BOND_TYPE;
+import net.sf.jniinchi.INCHI_KEY;
+import net.sf.jniinchi.INCHI_OPTION;
+import net.sf.jniinchi.INCHI_PARITY;
+import net.sf.jniinchi.INCHI_RADICAL;
+import net.sf.jniinchi.INCHI_RET;
+import net.sf.jniinchi.INCHI_STEREOTYPE;
+import net.sf.jniinchi.JniInchiAtom;
+import net.sf.jniinchi.JniInchiBond;
+import net.sf.jniinchi.JniInchiException;
+import net.sf.jniinchi.JniInchiInput;
+import net.sf.jniinchi.JniInchiOutput;
+import net.sf.jniinchi.JniInchiOutputKey;
+import net.sf.jniinchi.JniInchiStereo0D;
+import net.sf.jniinchi.JniInchiWrapper;
 
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.annotations.TestClass;
@@ -31,13 +54,7 @@ import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomParity;
 import org.openscience.cdk.interfaces.IBond;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 /**
  * <p>This class generates the IUPAC International Chemical Identifier (InChI) for
@@ -101,7 +118,7 @@ public class InChIGenerator {
      * @throws org.openscience.cdk.exception.CDKException if there is an
      * error during InChI generation
      */
-    @TestClass("testGetInchiFromChlorineAtom,testGetInchiFromLithiumIontestGetInchiFromChlorine37Atom")
+    @TestMethod("testGetInchiFromChlorineAtom,testGetInchiFromLithiumIontest,GetInchiFromChlorine37Atom")
     protected InChIGenerator(IAtomContainer atomContainer) throws CDKException {
         try {
             input = new JniInchiInput("");
@@ -143,7 +160,7 @@ public class InChIGenerator {
      * @param options           List of INCHI_OPTION.
      * @throws CDKException
      */
-    protected InChIGenerator(IAtomContainer atomContainer, List options) throws CDKException {
+    protected InChIGenerator(IAtomContainer atomContainer, List<INCHI_OPTION> options) throws CDKException {
         try {
             input = new JniInchiInput(options);
             generateInchiFromCDKAtomContainer(atomContainer);
@@ -227,7 +244,7 @@ public class InChIGenerator {
             // Check whether isotopic
             Integer isotopeNumber = atom.getMassNumber();
             if (isotopeNumber != CDKConstants.UNSET && ifact != null) {
-                IAtom isotope = atomContainer.getBuilder().newAtom(el);
+                IAtom isotope = atomContainer.getBuilder().newInstance(IAtom.class,el);
                 ifact.configure(isotope);
                 if (isotope.getMassNumber().intValue() == isotopeNumber.intValue()) {
                     isotopeNumber = 0;
@@ -241,7 +258,7 @@ public class InChIGenerator {
             // atom.getHydrogenCount() returns number of implict hydrogens, not
             // total number
             // Ref: Posting to cdk-devel list by Egon Willighagen 2005-09-17
-            Integer implicitH = atom.getHydrogenCount();
+            Integer implicitH = atom.getImplicitHydrogenCount();
             if (implicitH == CDKConstants.UNSET) implicitH = 0;
             
             if (implicitH != 0) {
@@ -326,7 +343,7 @@ public class InChIGenerator {
         atoms = atomContainer.atoms().iterator();
         while (atoms.hasNext()) {
         	IAtom atom = atoms.next();
-            IAtomParity parity = atomContainer.getAtomParity(atom);
+            IAtomParity parity = AtomContainerManipulator.getAtomParity(atomContainer, atom);
             if (parity != null) {
                 IAtom[] surroundingAtoms = parity.getSurroundingAtoms();
                 int sign = parity.getParity();
@@ -383,7 +400,7 @@ public class InChIGenerator {
     public String getInchiKey() throws CDKException {
         JniInchiOutputKey key;
         try {
-            key = JniInchiWrapper.getInChIKey(output.getInchi());
+            key = JniInchiWrapper.getInchiKey(output.getInchi());
             if (key.getReturnStatus() == INCHI_KEY.OK) {
                 return key.getKey();
             } else {

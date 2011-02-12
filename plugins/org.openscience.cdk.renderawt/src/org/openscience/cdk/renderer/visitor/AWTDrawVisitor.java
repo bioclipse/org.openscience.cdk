@@ -57,7 +57,10 @@ import org.openscience.cdk.renderer.font.AWTFontManager;
 import org.openscience.cdk.renderer.font.IFontManager;
 import org.openscience.cdk.renderer.generators.BasicSceneGenerator;
 import org.openscience.cdk.renderer.generators.IGeneratorParameter;
+import org.openscience.cdk.renderer.generators.BasicBondGenerator.WedgeWidth;
+import org.openscience.cdk.renderer.generators.BasicSceneGenerator.Scale;
 import org.openscience.cdk.renderer.generators.BasicSceneGenerator.UseAntiAliasing;
+import org.openscience.cdk.renderer.generators.ReactionSceneGenerator.ArrowHeadWidth;
 
 
 /**
@@ -96,7 +99,7 @@ public class AWTDrawVisitor extends AbstractAWTDrawVisitor {
 
         for (IGeneratorParameter<?> param :
             new BasicSceneGenerator().getParameters()) {
-            if (param instanceof BasicSceneGenerator.BackGroundColor)
+            if (param instanceof BasicSceneGenerator.BackgroundColor)
             this.backgroundColor = (Color)param.getDefault();
         }
 	}
@@ -110,9 +113,11 @@ public class AWTDrawVisitor extends AbstractAWTDrawVisitor {
     }
 
     public void visit(ArrowElement line) {
+    	double scale = this.rendererModel.getParameter(
+            Scale.class).getValue();
         Stroke savedStroke = this.g.getStroke();
         
-        int w = (int) (line.width * this.rendererModel.getScale());
+        int w = (int) (line.width * scale);
         if (strokeMap.containsKey(w)) {
             this.g.setStroke(strokeMap.get(w));
         } else {
@@ -125,7 +130,9 @@ public class AWTDrawVisitor extends AbstractAWTDrawVisitor {
         int[] a = this.transformPoint(line.x1, line.y1);
         int[] b = this.transformPoint(line.x2, line.y2);
         this.g.drawLine(a[0], a[1], b[0], b[1]);
-        double aW = rendererModel.getArrowHeadWidth() / rendererModel.getScale();
+        double aW = rendererModel.getParameter(
+        	ArrowHeadWidth.class
+        ).getValue() / scale;
         if(line.direction){
 	        int[] c = this.transformPoint(line.x1-aW, line.y1-aW);
 	        int[] d = this.transformPoint(line.x1-aW, line.y1+aW);
@@ -144,7 +151,8 @@ public class AWTDrawVisitor extends AbstractAWTDrawVisitor {
     public void visit(LineElement line) {
         Stroke savedStroke = this.g.getStroke();
         
-        int w = (int) (line.width * this.rendererModel.getScale());
+        int w = (int) (line.width * this.rendererModel.getParameter(
+            	Scale.class).getValue());
         if (strokeMap.containsKey(w)) {
             this.g.setStroke(strokeMap.get(w));
         } else {
@@ -200,10 +208,10 @@ public class AWTDrawVisitor extends AbstractAWTDrawVisitor {
     public void visit(TextElement textElement) {
         this.g.setFont(this.fontManager.getFont());
         Point p = this.getTextBasePoint(
-                textElement.text, textElement.x, textElement.y, g);
+                textElement.text, textElement.xCoord, textElement.yCoord, g);
         Rectangle2D textBounds =
                 this.getTextBounds(
-                        textElement.text, textElement.x, textElement.y, g);
+                        textElement.text, textElement.xCoord, textElement.yCoord, g);
         this.g.setColor(backgroundColor);
         this.g.fill(textBounds);
         this.g.setColor(textElement.color);
@@ -215,7 +223,9 @@ public class AWTDrawVisitor extends AbstractAWTDrawVisitor {
         Vector2d normal = 
             new Vector2d(wedge.y1 - wedge.y2, wedge.x2 - wedge.x1);
         normal.normalize();
-        normal.scale(rendererModel.getWedgeWidth() / rendererModel.getScale());  
+        normal.scale(
+                rendererModel.getParameter(WedgeWidth.class).getValue() 
+                / rendererModel.getParameter(Scale.class).getValue());  
         
         // make the triangle corners
         Point2d vertexA = new Point2d(wedge.x1, wedge.y1);
@@ -277,9 +287,9 @@ public class AWTDrawVisitor extends AbstractAWTDrawVisitor {
         this.g.setFont(this.fontManager.getFont());
         Point p = 
             super.getTextBasePoint(
-                    atomSymbol.text, atomSymbol.x, atomSymbol.y, g);
+                    atomSymbol.text, atomSymbol.xCoord, atomSymbol.yCoord, g);
         Rectangle2D textBounds = 
-            this.getTextBounds(atomSymbol.text, atomSymbol.x, atomSymbol.y, g);
+            this.getTextBounds(atomSymbol.text, atomSymbol.xCoord, atomSymbol.yCoord, g);
         this.g.setColor(backgroundColor);
         this.g.fill(textBounds);
         this.g.setColor(atomSymbol.color);
@@ -401,9 +411,9 @@ public class AWTDrawVisitor extends AbstractAWTDrawVisitor {
         this.g.setFont(this.fontManager.getFont());
         Point p = 
             super.getTextBasePoint(
-                    textGroup.text, textGroup.x, textGroup.y, g);
+                    textGroup.text, textGroup.xCoord, textGroup.yCoord, g);
         Rectangle2D textBounds = 
-            this.getTextBounds(textGroup.text, textGroup.x, textGroup.y, g);
+            this.getTextBounds(textGroup.text, textGroup.xCoord, textGroup.yCoord, g);
         this.g.setColor(backgroundColor);
         this.g.fill(textBounds);
         this.g.setColor(textGroup.color);
@@ -513,7 +523,7 @@ public class AWTDrawVisitor extends AbstractAWTDrawVisitor {
 
     public void setRendererModel(RendererModel rendererModel) {
         this.rendererModel = rendererModel;
-        if (rendererModel.getRenderingParameter(UseAntiAliasing.class)
+        if (rendererModel.getParameter(UseAntiAliasing.class)
             .getValue()) {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);

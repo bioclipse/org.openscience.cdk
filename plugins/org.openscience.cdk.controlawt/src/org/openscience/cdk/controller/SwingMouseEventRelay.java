@@ -104,9 +104,9 @@ public class SwingMouseEventRelay implements MouseMotionListener,
     public void mouseWheelMoved(MouseWheelEvent e) {
         int rotation = e.getWheelRotation(); 
         if (rotation > 0) {
-            relay.mouseWheelMovedForward(rotation);
+            // relay.mouseWheelMovedForward(rotation);
         } else {
-            relay.mouseWheelMovedBackward(rotation);
+            // relay.mouseWheelMovedBackward(rotation);
         }
     }
 

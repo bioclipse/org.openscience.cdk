@@ -487,6 +487,15 @@
     <at:hybridization rdf:resource="&at;sp2"/>
   </at:AtomType>
 
+  <at:AtomType rdf:ID="N.oxide">
+    <at:formalCharge>0</at:formalCharge>
+    <at:hasElement rdf:resource="&elem;N"/>
+    <at:formalNeighbourCount>4</at:formalNeighbourCount>
+    <at:lonePairCount>0</at:lonePairCount>
+    <at:piBondCount>1</at:piBondCount>
+    <at:hybridization rdf:resource="&at;sp2"/>
+  </at:AtomType>
+
   <at:AtomType rdf:ID="N.thioamide">
     <at:broader rdf:resource="&cdkat;N.sp2"/>
     <at:formalCharge>0</at:formalCharge>
@@ -648,6 +657,15 @@
     <at:formalNeighbourCount>1</at:formalNeighbourCount>
     <at:lonePairCount>3</at:lonePairCount>
     <at:piBondCount>0</at:piBondCount>
+    <at:hybridization rdf:resource="&at;sp3"/>
+  </at:AtomType>
+
+  <at:AtomType rdf:ID="S.thionyl">
+    <at:formalCharge>0</at:formalCharge>
+    <at:hasElement rdf:resource="&elem;S"/>
+    <at:formalNeighbourCount>4</at:formalNeighbourCount>
+    <at:lonePairCount>0</at:lonePairCount>
+    <at:piBondCount>2</at:piBondCount>
     <at:hybridization rdf:resource="&at;sp3"/>
   </at:AtomType>
 
@@ -822,7 +840,7 @@
     <at:formalNeighbourCount>1</at:formalNeighbourCount>
     <at:lonePairCount>3</at:lonePairCount>
     <at:piBondCount>0</at:piBondCount>
-    <at:hybridization rdf:resource="&at;s"/>
+    <at:hybridization rdf:resource="&at;sp3"/>
   </at:AtomType>
 
   <at:AtomType rdf:ID="Cl.plus.sp3">
@@ -849,7 +867,7 @@
     <at:formalNeighbourCount>0</at:formalNeighbourCount>
     <at:lonePairCount>4</at:lonePairCount>
     <at:piBondCount>0</at:piBondCount>
-    <at:hybridization rdf:resource="&at;s"/>
+    <at:hybridization rdf:resource="&at;sp3"/>
   </at:AtomType>
 
   <at:AtomType rdf:ID="Cl.radical">
@@ -859,7 +877,7 @@
     <at:lonePairCount>3</at:lonePairCount>
     <at:piBondCount>0</at:piBondCount>
     <at:singleElectronCount>1</at:singleElectronCount>
-    <at:hybridization rdf:resource="&at;s"/>
+    <at:hybridization rdf:resource="&at;sp3"/>
   </at:AtomType>
 
   <at:AtomType rdf:ID="Cl.plus.radical">
@@ -905,7 +923,7 @@
     <at:formalNeighbourCount>1</at:formalNeighbourCount>
     <at:lonePairCount>3</at:lonePairCount>
     <at:piBondCount>0</at:piBondCount>
-    <at:hybridization rdf:resource="&at;s"/>
+    <at:hybridization rdf:resource="&at;sp3"/>
   </at:AtomType>
 
   <at:AtomType rdf:ID="I.minus">
@@ -969,7 +987,7 @@
     <at:lonePairCount>3</at:lonePairCount>
     <at:piBondCount>0</at:piBondCount>
     <at:singleElectronCount>1</at:singleElectronCount>
-    <at:hybridization rdf:resource="&at;s"/>
+    <at:hybridization rdf:resource="&at;sp3"/>
   </at:AtomType>
 
   <at:AtomType rdf:ID="I.plus.radical">
@@ -988,7 +1006,7 @@
     <at:formalNeighbourCount>1</at:formalNeighbourCount>
     <at:lonePairCount>3</at:lonePairCount>
     <at:piBondCount>0</at:piBondCount>
-    <at:hybridization rdf:resource="&at;s"/>
+    <at:hybridization rdf:resource="&at;sp3"/>
   </at:AtomType>
 
   <at:AtomType rdf:ID="Br.minus">
@@ -997,7 +1015,7 @@
     <at:formalNeighbourCount>0</at:formalNeighbourCount>
     <at:lonePairCount>4</at:lonePairCount>
     <at:piBondCount>0</at:piBondCount>
-    <at:hybridization rdf:resource="&at;s"/>
+    <at:hybridization rdf:resource="&at;sp3"/>
   </at:AtomType>
 
   <at:AtomType rdf:ID="Br.radical">
@@ -1007,7 +1025,7 @@
     <at:lonePairCount>3</at:lonePairCount>
     <at:piBondCount>0</at:piBondCount>
     <at:singleElectronCount>1</at:singleElectronCount>
-    <at:hybridization rdf:resource="&at;s"/>
+    <at:hybridization rdf:resource="&at;sp3"/>
   </at:AtomType>
 
   <at:AtomType rdf:ID="Br.plus.radical">
@@ -1073,6 +1091,15 @@
     <at:lonePairCount>1</at:lonePairCount>
     <at:piBondCount>0</at:piBondCount>
     <at:hybridization rdf:resource="&at;sp3"/>
+  </at:AtomType>
+
+  <at:AtomType rdf:ID="P.anium">
+    <at:formalCharge>1</at:formalCharge>
+    <at:hasElement rdf:resource="&elem;P"/>
+    <at:formalNeighbourCount>3</at:formalNeighbourCount>
+    <at:lonePairCount>0</at:lonePairCount>
+    <at:piBondCount>1</at:piBondCount>
+    <at:hybridization rdf:resource="&at;sp2"/>
   </at:AtomType>
 
   <at:AtomType rdf:ID="P.irane">

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CDK plugin
 Bundle-SymbolicName: org.openscience.cdk.smarts;singleton:=true
-Bundle-Version: 1.3.4.0cdkjchempaint8
+Bundle-Version: 1.3.8.0cdkjchempaint17
 Bundle-Vendor: The Chemistry Development Kit Project
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.openscience.cdk.smarts.Activator
@@ -16,10 +16,11 @@ Require-Bundle: org.openscience.cdk.annotation,
  org.openscience.cdk.valencycheck,
  org.openscience.cdk.isomorphism,
  org.openscience.cdk.extra,
+ org.openscience.cdk.smsd,
  javax.vecmath,
  org.eclipse.core.runtime
-Export-Package: org.openscience.cdk.isomorphism.matchers.smarts,
+Export-Package: org.openscience.cdk.smiles.smarts,
  org.openscience.cdk.smiles.smarts.parser,
  org.openscience.cdk.smiles.smarts.parser.visitor,
- org.openscience.cdk.smiles.smarts,
+ org.openscience.cdk.isomorphism.matchers.smarts,
  org.openscience.cdk.smarts

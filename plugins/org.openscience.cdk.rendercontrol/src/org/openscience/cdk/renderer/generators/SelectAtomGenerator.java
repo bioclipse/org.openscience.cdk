@@ -21,7 +21,7 @@
 package org.openscience.cdk.renderer.generators;
 
 import java.awt.Color;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.vecmath.Point2d;
@@ -34,6 +34,7 @@ import org.openscience.cdk.renderer.elements.IRenderingElement;
 import org.openscience.cdk.renderer.elements.OvalElement;
 import org.openscience.cdk.renderer.elements.RectangleElement;
 import org.openscience.cdk.renderer.generators.BasicAtomGenerator.Shape;
+import org.openscience.cdk.renderer.generators.BasicSceneGenerator.Scale;
 import org.openscience.cdk.renderer.generators.parameter.AbstractGeneratorParameter;
 import org.openscience.cdk.renderer.selection.IChemObjectSelection;
 import org.openscience.cdk.renderer.selection.IncrementalSelection;
@@ -41,7 +42,7 @@ import org.openscience.cdk.renderer.selection.IncrementalSelection;
 /**
  * @cdk.module rendercontrol
  */
-public class SelectAtomGenerator implements IGenerator {
+public class SelectAtomGenerator implements IGenerator<IAtomContainer> {
 
     public static class SelectionShape extends
     AbstractGeneratorParameter<Shape> {
@@ -51,12 +52,33 @@ public class SelectAtomGenerator implements IGenerator {
     }
     private IGeneratorParameter<Shape> selectionShape = new SelectionShape();
     
+    /**
+     * The radius on screen of the selection shape
+     */
+    public static class SelectionRadius extends 
+                        AbstractGeneratorParameter<Double> {
+        public Double getDefault() {
+            return 2.0;
+        }
+    }
+    
+    private SelectionRadius selectionRadius = new SelectionRadius();
+    
+    public static class SelectionAtomColor extends 
+                        AbstractGeneratorParameter<Color> {
+        public Color getDefault() {
+            return Color.LIGHT_GRAY;
+        }
+    }
+    private SelectionAtomColor selectionAtomColor = new SelectionAtomColor();
+    
     private boolean autoUpdateSelection = true;
 
     public SelectAtomGenerator() {}
 
     public IRenderingElement generate(IAtomContainer ac, RendererModel model) {
-        Color selectionColor = model.getSelectedPartColor();
+        Color selectionColor = 
+            model.getParameter(SelectionAtomColor.class).getValue();
         Shape shape = selectionShape.getValue();
         IChemObjectSelection selection = model.getSelection();
         ElementGroup selectionElements = new ElementGroup();
@@ -64,7 +86,9 @@ public class SelectAtomGenerator implements IGenerator {
         if(selection==null)
         	return selectionElements;
         if (this.autoUpdateSelection || selection.isFilled()) {
-            double r = model.getSelectionRadius() / model.getScale();
+            double r = 
+                model.getParameter(SelectionRadius.class).getValue() /
+                model.getParameter(Scale.class).getValue();
 
             double d = 2 * r;
             IAtomContainer selectedAC = selection.getConnectedAtomContainer();
@@ -98,6 +122,12 @@ public class SelectAtomGenerator implements IGenerator {
     }
 
     public List<IGeneratorParameter<?>> getParameters() {
-        return Collections.emptyList();
+        return Arrays.asList(
+                new IGeneratorParameter<?>[] {
+                        selectionRadius,
+                        selectionShape,
+                        selectionAtomColor
+                }
+        );
     }
 }

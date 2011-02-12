@@ -34,7 +34,7 @@ import java.io.Serializable;
  * <p>Use the IsotopeFactory to get a ready-to-use elements
  * by symbol or atomic number:
  * <pre>
- *   IsotopeFactory if = IsotopeFactory.getInstance(new Element().getBuilder());
+ *   IsotopeFactory if = IsotopeFactory.getInstance(new Element().getNewBuilder());
  *   Element e1 = if.getElement("C");
  *   Element e2 = if.getElement(12);
  * </pre>
@@ -104,7 +104,7 @@ public class Element extends ChemObject implements Serializable, IElement, Clone
      * @param   symbol  The element symbol of this element.
      * @param   atomicNumber  The atomicNumber of this element.
      */
-    public Element(String symbol, int atomicNumber) {
+    public Element(String symbol, Integer atomicNumber) {
         this(symbol);
         this.atomicNumber = atomicNumber;
     }
@@ -117,7 +117,7 @@ public class Element extends ChemObject implements Serializable, IElement, Clone
 	 * the IsotopeFactory.configure() method:
 	 * <pre>
 	 *   Element element = new Element("C");
-	 *   IsotopeFactory if = IsotopeFactory.getInstance(element.getBuilder());
+	 *   IsotopeFactory if = IsotopeFactory.getInstance(element.getNewBuilder());
 	 *   if.configure(element);
 	 * </pre>
 	 * </p>      

@@ -1,6 +1,4 @@
-/* $Revision$ $Author$ $Date$
- *
- *  Copyright (C) 2008  Arvid Berg <goglepox@users.sf.net>
+/*  Copyright (C) 2008  Arvid Berg <goglepox@users.sf.net>
  *
  *  Contact: cdk-devel@list.sourceforge.net
  *
@@ -22,26 +20,48 @@ package org.openscience.cdk.renderer.elements;
 
 import java.awt.Color;
 
+import org.openscience.cdk.annotations.TestClass;
+import org.openscience.cdk.annotations.TestMethod;
+
 /**
+ * Text element as used in the chemical drawing. This can be a element symbol.
+ *
  * @cdk.module render
  * @cdk.githash
  */
+@TestClass("org.openscience.cdk.renderer.elements.TextElementTest")
 public class TextElement implements IRenderingElement {
 
-	public final double x;
-	public final double y;
+	/** The x coordinate where the text should be displayed. */
+	public final double xCoord;
+	/** The y coordinate where the text should be displayed. */
+	public final double yCoord;
+	/** The text to be displayed. */
 	public final String text;
+	/** The color of the text. */
 	public final Color color;
 
-	public TextElement(double x, double y, String text, Color color) {
-		this.x = x;
-		this.y = y;
+	/**
+	 * Constructs a new TextElement with the content <code>text</code> to be
+	 * drawn at position (x,y) in the color <code>color</code>.
+	 *
+	 * @param xCoord     x coordinate where the text should be displayed
+	 * @param yCoord     y coordinate where the text should be displayed
+	 * @param text  the text to be drawn
+	 * @param color the color of the text
+	 */
+	@TestMethod("testConstructor")
+	public TextElement(double xCoord, double yCoord, String text, Color color) {
+		this.xCoord = xCoord;
+		this.yCoord = yCoord;
 		this.text = text;
 		this.color = color;
 	}
 
-	public void accept(IRenderingVisitor v) {
-		v.visit(this);
+	/** {@inheritDoc} */
+	@TestMethod("testAccept")
+	public void accept(IRenderingVisitor visotor) {
+		visotor.visit(this);
 	}
 
 }

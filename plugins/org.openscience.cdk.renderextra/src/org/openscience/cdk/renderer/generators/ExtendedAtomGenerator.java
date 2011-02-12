@@ -20,6 +20,8 @@ package org.openscience.cdk.renderer.generators;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 import javax.vecmath.Point2d;
@@ -32,6 +34,8 @@ import org.openscience.cdk.renderer.RendererModel;
 import org.openscience.cdk.renderer.elements.IRenderingElement;
 import org.openscience.cdk.renderer.elements.TextGroupElement;
 import org.openscience.cdk.renderer.elements.TextGroupElement.Position;
+import org.openscience.cdk.renderer.generators.AtomNumberGenerator.WillDrawAtomNumbers;
+import org.openscience.cdk.renderer.generators.parameter.AbstractGeneratorParameter;
 
 /**
  * A generator for atoms with mass, charge, etc.
@@ -41,21 +45,41 @@ import org.openscience.cdk.renderer.elements.TextGroupElement.Position;
  *
  */
 public class ExtendedAtomGenerator extends BasicAtomGenerator {
+
+    public static class ShowImplicitHydrogens extends
+    AbstractGeneratorParameter<Boolean> {
+    	public Boolean getDefault() {
+    		return Boolean.TRUE;
+    	}
+    }
+    private IGeneratorParameter<Boolean> showImplicitHydrogens =
+    	new ShowImplicitHydrogens();
+
+    public static class ShowAtomTypeNames extends
+                        AbstractGeneratorParameter<Boolean> {
+        public Boolean getDefault() {
+            return Boolean.FALSE;
+        }
+    }
+    private ShowAtomTypeNames showAtomTypeNames =
+    	new ShowAtomTypeNames();
     
     public IRenderingElement generate(
             IAtomContainer ac, IAtom atom, RendererModel model) {
-        
+        boolean drawNumbers = 
+            model.getParameter(WillDrawAtomNumbers.class).getValue(); 
         if (!hasCoordinates(atom) 
              || invisibleHydrogen(atom, model) 
-             || (invisibleCarbon(atom, ac, model) && !model.getDrawNumbers())) {
+             || (invisibleCarbon(atom, ac, model) 
+             && !drawNumbers)) {
             return null;
-        } else if (model.getRenderingParameter(CompactAtom.class).getValue()) {
+        } else if (model.getParameter(CompactAtom.class).getValue()) {
             return this.generateCompactElement(atom, model);
         } else {
             String text;
             if (atom instanceof IPseudoAtom) {
                 text = ((IPseudoAtom) atom).getLabel();
-            } else if (invisibleCarbon(atom, ac, model) && model.drawNumbers()) {
+            } else if (invisibleCarbon(atom, ac, model) && drawNumbers) {
                 text = String.valueOf(ac.getAtomNumber(atom) + 1);
             } else {
                 text = atom.getSymbol();
@@ -70,7 +94,7 @@ public class ExtendedAtomGenerator extends BasicAtomGenerator {
     
     public boolean hideAtomSymbol(IAtom atom, RendererModel model) {
         return atom.getSymbol().equals("C") &&
-               !model.getRenderingParameter(KekuleStructure.class).getValue();
+               !model.getParameter(KekuleStructure.class).getValue();
     }
     
     public void decorate(TextGroupElement textGroup, 
@@ -79,15 +103,17 @@ public class ExtendedAtomGenerator extends BasicAtomGenerator {
                          RendererModel model) {
         Stack<Position> unused = getUnusedPositions(ac, atom);
         
-        if (!invisibleCarbon(atom, ac, model) && model.getDrawNumbers()) {
+        boolean drawNumbers = 
+            model.getParameter(WillDrawAtomNumbers.class).getValue();
+        if (!invisibleCarbon(atom, ac, model) && drawNumbers) {
             Position position = getNextPosition(unused);
             String number = String.valueOf(ac.getAtomNumber(atom) + 1);
             textGroup.addChild(number, position);
         }
         
-        if (model.getShowImplicitHydrogens()) {
-        	if(atom.getHydrogenCount()!=null){
-	            int nH = atom.getHydrogenCount();
+        if (showImplicitHydrogens.getValue()) {
+        	if(atom.getImplicitHydrogenCount()!=null){
+	            int nH = atom.getImplicitHydrogenCount();
 	            if (nH > 0) {
 	                Position position = getNextPosition(unused);
 	                if (nH == 1) {
@@ -174,4 +200,12 @@ public class ExtendedAtomGenerator extends BasicAtomGenerator {
         }
     }
     
+    public List<IGeneratorParameter<?>> getParameters() {
+    	List<IGeneratorParameter<?>> parameters =
+    		new ArrayList<IGeneratorParameter<?>>();
+    	parameters.add(showImplicitHydrogens);
+    	parameters.add(showAtomTypeNames);
+    	parameters.addAll(super.getParameters());
+    	return parameters;
+    }
 }

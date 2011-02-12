@@ -28,6 +28,7 @@ import java.util.Map;
 import org.openscience.cdk.AminoAcid;
 import org.openscience.cdk.ChemFile;
 import org.openscience.cdk.dict.DictRef;
+import org.openscience.cdk.interfaces.IAminoAcid;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
@@ -107,7 +108,7 @@ public class AminoAcids {
      * 
      * @return aminoAcids, a HashMap containing the amino acids as AminoAcids.
      */
-    public static AminoAcid[] createAAs() {
+    public synchronized static AminoAcid[] createAAs() {
     	if (aminoAcids != null) {
             return aminoAcids;
         }
@@ -192,8 +193,8 @@ public class AminoAcids {
      * Returns a HashMap where the key is one of G, A, V, L, I, S, T, C, M, D,
      * N, E, Q, R, K, H, F, Y, W and P.
      */
-    public static Map<String,AminoAcid> getHashMapBySingleCharCode() {
-        AminoAcid[] monomers = createAAs();
+    public static Map<String,IAminoAcid> getHashMapBySingleCharCode() {
+        IAminoAcid[] monomers = createAAs();
         HashMap map = new HashMap();
         for (int i=0; i<monomers.length; i++) {
             map.put(monomers[i].getProperty(RESIDUE_NAME_SHORT), monomers[i]);

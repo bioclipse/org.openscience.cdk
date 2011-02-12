@@ -39,7 +39,13 @@ import org.openscience.cdk.tools.diff.tree.Point3dDifference;
  */
 @TestClass("org.openscience.cdk.tools.diff.AtomDiffTest")
 public class AtomDiff {
-    
+
+    /**
+     * Overwrite the default public constructor because this class is not
+     * supposed to be instantiated.
+     */
+    private AtomDiff() {}
+
     @TestMethod("testMatchAgainstItself,testDiff")
     public static String diff( IChemObject first, IChemObject second ) {
     	IDifference diff = difference(first, second);
@@ -57,7 +63,7 @@ public class AtomDiff {
         IAtom firstElem = (IAtom)first;
         IAtom secondElem = (IAtom)second;
         ChemObjectDifference totalDiff = new ChemObjectDifference("AtomDiff");
-        totalDiff.addChild(IntegerDifference.construct("H", firstElem.getHydrogenCount(), secondElem.getHydrogenCount()));
+        totalDiff.addChild(IntegerDifference.construct("H", firstElem.getImplicitHydrogenCount(), secondElem.getImplicitHydrogenCount()));
         totalDiff.addChild(IntegerDifference.construct("SP", firstElem.getStereoParity(), secondElem.getStereoParity()));
         totalDiff.addChild(Point2dDifference.construct("2D", firstElem.getPoint2d(), secondElem.getPoint2d()));
         totalDiff.addChild(Point3dDifference.construct("3D", firstElem.getPoint3d(), secondElem.getPoint3d()));

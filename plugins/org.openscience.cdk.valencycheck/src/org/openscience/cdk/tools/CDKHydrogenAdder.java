@@ -44,14 +44,12 @@ import org.openscience.cdk.interfaces.IPseudoAtom;
  *   IMolecule methane = new Molecule();
  *   IAtom carbon = new Atom("C");
  *   methane.addAtom(carbon);
- *   CDKAtomTypeMatcher matcher = CDKAtomTypeMatcher.getInstance(methane.getBuilder());
- *   Iterator<IAtom> atoms = methane.atoms();
- *   while (atoms.hasNext()) {
- *     IAtom atom = atoms.next();
+ *   CDKAtomTypeMatcher matcher = CDKAtomTypeMatcher.getInstance(methane.getNewBuilder());
+ *   for (IAtom atom : methane.atoms) {
  *     IAtomType type = matcher.findMatchingAtomType(methane, atom);
  *     AtomTypeManipulator.configure(atom, type);
  *   }
- *   CDKHydrogenAdder adder = CDKHydrogenAdder.getInstance(methane.getBuilder());
+ *   CDKHydrogenAdder adder = CDKHydrogenAdder.getInstance(methane.getNewBuilder());
  *   adder.addImplicitHydrogens(methane);
  * </pre>
  *
@@ -63,10 +61,10 @@ import org.openscience.cdk.interfaces.IPseudoAtom;
  *   IAtom carbon2 = new Atom("C");
  *   ethane.addAtom(carbon1);
  *   ethane.addAtom(carbon2);
- *   CDKAtomTypeMatcher matcher = CDKAtomTypeMatcher.getInstance(ethane.getBuilder());
+ *   CDKAtomTypeMatcher matcher = CDKAtomTypeMatcher.getInstance(ethane.getNewBuilder());
  *   IAtomType type = matcher.findMatchingAtomType(ethane, carbon1);
  *   AtomTypeManipulator.configure(carbon1, type);
- *   CDKHydrogenAdder adder = CDKHydrogenAdder.getInstance(ethane.getBuilder());
+ *   CDKHydrogenAdder adder = CDKHydrogenAdder.getInstance(ethane.getNewBuilder());
  *   adder.addImplicitHydrogens(ethane, carbon1);
  * </pre>
  * 
@@ -127,7 +125,7 @@ public class CDKHydrogenAdder {
 			throw new CDKException("IAtom is not typed! " + atom.getSymbol());
 		
 		if ("X".equals(atom.getAtomTypeName())) {
-			atom.setHydrogenCount(0);
+			atom.setImplicitHydrogenCount(0);
 			return; 
 		}
 		
@@ -139,7 +137,7 @@ public class CDKHydrogenAdder {
 			throw new CDKException("Atom type is too general; cannot decide the number of implicit hydrogen to add for: " + atom.getAtomTypeName());
 		
 		// very simply counting: each missing explicit neighbor is a missing hydrogen
-		atom.setHydrogenCount(
+		atom.setImplicitHydrogenCount(
 			type.getFormalNeighbourCount() - container.getConnectedAtomsCount(atom)
 		);
 	}

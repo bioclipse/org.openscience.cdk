@@ -133,7 +133,7 @@ public class VASPReader extends DefaultChemObjectReader {
 		return false;
 	}
 
-    public IChemObject read(IChemObject object) throws CDKException {
+	public <T extends IChemObject> T read(T object) throws CDKException {
         if (object instanceof IChemFile) {
             IChemFile cf = (IChemFile)object;
             try {
@@ -145,20 +145,20 @@ public class VASPReader extends DefaultChemObjectReader {
                 logger.debug(exception);
                 throw new CDKException(error, exception);
             }
-            return cf;
+            return (T)cf;
         } else {
             throw new CDKException("Only supported is reading of ChemFile.");
         }
     }
     
     private IChemFile readChemFile(IChemFile file) throws CDKException, IOException {
-        IChemSequence seq = readChemSequence(file.getBuilder().newChemSequence());
+        IChemSequence seq = readChemSequence(file.getBuilder().newInstance(IChemSequence.class));
         file.addChemSequence(seq);
         return file;
     }
     
     private IChemSequence readChemSequence(IChemSequence sequence) throws CDKException, IOException {
-        IChemModel chemModel = sequence.getBuilder().newChemModel();
+        IChemModel chemModel = sequence.getBuilder().newInstance(IChemModel.class);
         ICrystal crystal = null;
         
         // Get the info line (first token of the first line)
@@ -206,8 +206,8 @@ public class VASPReader extends DefaultChemObjectReader {
             
             logger.debug("New crystal started...");
             
-            crystal = sequence.getBuilder().newCrystal();
-            chemModel = sequence.getBuilder().newChemModel();
+            crystal = sequence.getBuilder().newInstance(ICrystal.class);
+            chemModel = sequence.getBuilder().newInstance(IChemModel.class);
             
             // Get acell
             for(int i=0; i<3; i++) {
@@ -267,7 +267,7 @@ public class VASPReader extends DefaultChemObjectReader {
                 } catch (Exception exception) {
                     throw new CDKException("Could not determine element symbol!", exception);
                 }
-                IAtom atom = sequence.getBuilder().newAtom(symbol);
+                IAtom atom = sequence.getBuilder().newInstance(IAtom.class,symbol);
                 atom.setAtomicNumber(atomType[i]);
                 // convert fractional to cartesian
                 double[] frac = new double[3];

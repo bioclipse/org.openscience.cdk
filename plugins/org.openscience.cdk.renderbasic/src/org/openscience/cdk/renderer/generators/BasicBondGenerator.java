@@ -43,6 +43,7 @@ import org.openscience.cdk.renderer.elements.IRenderingElement;
 import org.openscience.cdk.renderer.elements.LineElement;
 import org.openscience.cdk.renderer.elements.WedgeLineElement;
 import org.openscience.cdk.renderer.elements.WedgeLineElement.Direction;
+import org.openscience.cdk.renderer.generators.BasicSceneGenerator.Scale;
 import org.openscience.cdk.renderer.generators.parameter.AbstractGeneratorParameter;
 import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.tools.ILoggingTool;
@@ -53,7 +54,7 @@ import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 /**
  * @cdk.module renderbasic
  */
-public class BasicBondGenerator implements IGenerator {
+public class BasicBondGenerator implements IGenerator<IAtomContainer> {
 
     // FIXME: bond width should be defined in world, not screen coordinates
     /**
@@ -89,7 +90,40 @@ public class BasicBondGenerator implements IGenerator {
     }
     private IGeneratorParameter<Color> defaultBondColor = new DefaultBondColor();
 
-	private ILoggingTool logger =
+    /**
+     * The length on the screen of a typical bond.
+     */
+    public static class BondLength extends
+    AbstractGeneratorParameter<Double> {
+        public Double getDefault() {
+            return 40.0;
+        }
+    }
+    private IGeneratorParameter<Double> bondLength = new BondLength();
+    
+    /**
+     * The width on screen of the fat end of a wedge bond.
+     */
+    public static class WedgeWidth extends AbstractGeneratorParameter<Double> {
+        public Double getDefault() {
+            return 2.0;
+        }
+    }
+    private IGeneratorParameter<Double> wedgeWidth = new WedgeWidth();
+
+    /**
+     * The proportion to move in towards the ring center.
+     */
+    public static class TowardsRingCenterProportion extends
+        AbstractGeneratorParameter<Double> {
+        public Double getDefault() {
+            return 0.15;
+        }
+    }
+    private IGeneratorParameter<Double> ringCenterProportion =
+    	new TowardsRingCenterProportion();
+
+    private ILoggingTool logger =
 	    LoggingToolFactory.createLoggingTool(BasicBondGenerator.class);
 
 	protected IRingSet ringSet;
@@ -117,7 +151,7 @@ public class BasicBondGenerator implements IGenerator {
 
 	protected IRingSet getRingSet(final IAtomContainer atomContainer) {
 
-		IRingSet ringSet = atomContainer.getBuilder().newRingSet();
+		IRingSet ringSet = atomContainer.getBuilder().newInstance(IRingSet.class);
 		try {
 			IMoleculeSet molecules =
 				ConnectivityChecker.partitionIntoMolecules(atomContainer);
@@ -148,10 +182,10 @@ public class BasicBondGenerator implements IGenerator {
 	        return overrideColor;
 	    }
 
-	    Color color = model.getRenderingParameter(ColorHash.class)
+	    Color color = model.getParameter(ColorHash.class)
 	    	.getValue().get(bond);
 	    if (color == null) {
-	        return model.getRenderingParameter(DefaultBondColor.class).getValue();
+	        return model.getParameter(DefaultBondColor.class).getValue();
 	    } else {
 	        return color;
 	    }
@@ -167,12 +201,12 @@ public class BasicBondGenerator implements IGenerator {
 	 * @return a double in chem-model space
 	 */
 	public double getWidthForBond(IBond bond, RendererModel model) {
-		double scale = model.getScale();
+		double scale = model.getParameter(Scale.class).getValue();
 		if (this.overrideBondWidth != -1) {
 			return this.overrideBondWidth / scale;
 		} else {
 			return
-			    model.getRenderingParameter(BondWidth.class).getValue()
+			    model.getParameter(BondWidth.class).getValue()
 			    / scale;
 		}
 	}
@@ -225,7 +259,8 @@ public class BasicBondGenerator implements IGenerator {
 		Point2d p2 = bond.getAtom(1).getPoint2d();
 		Color color = this.getColorForBond(bond, model);
 		double bondWidth = this.getWidthForBond(bond, model);
-		double bondDistance = this.bondDistance.getValue() / model.getScale();
+		double bondDistance = this.bondDistance.getValue() /
+		    model.getParameter(Scale.class).getValue();
 		if (type == IBond.Order.SINGLE) {
 		    return new LineElement(p1.x, p1.y, p2.x, p2.y, bondWidth, color);
 		} else {
@@ -312,7 +347,8 @@ public class BasicBondGenerator implements IGenerator {
 		Point2d b = bond.getAtom(1).getPoint2d();
 
 		// the proportion to move in towards the ring center
-		final double DIST = 0.15;
+		final double DIST = model.getParameter(TowardsRingCenterProportion.class)
+			.getValue();
 
 		Point2d w = new Point2d();
 		w.interpolate(a, center, DIST);
@@ -373,7 +409,10 @@ public class BasicBondGenerator implements IGenerator {
 	}
 
 	public IRenderingElement generateBond(IBond bond, RendererModel model) {
-		if (!model.getShowExplicitHydrogens() && bindsHydrogen(bond)) {
+		boolean showExplicitHydrogens = model.getParameter(
+			BasicAtomGenerator.ShowExplicitHydrogens.class
+		).getValue();
+		if (!showExplicitHydrogens && bindsHydrogen(bond)) {
 			return null;
 		}
 
@@ -388,7 +427,11 @@ public class BasicBondGenerator implements IGenerator {
         return Arrays.asList(
             new IGeneratorParameter<?>[] {
                 bondWidth,
-                defaultBondColor
+                defaultBondColor,
+                bondLength,
+                wedgeWidth,
+                bondDistance,
+                ringCenterProportion
             }
         );
     }

@@ -34,6 +34,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.openscience.cdk.annotations.TestClass;
+import org.openscience.cdk.annotations.TestMethod;
 import org.openscience.cdk.event.ICDKChangeListener;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -45,25 +47,21 @@ import org.openscience.cdk.renderer.generators.parameter.AbstractGeneratorParame
 import org.openscience.cdk.renderer.selection.IChemObjectSelection;
 
 /**
- * Model for {@link Renderer} that contains settings for drawing objects.
+ * Model for {@link IRenderer} that contains settings for drawing objects.
  *
  * @cdk.module render
  * @cdk.githash
  */
+@TestClass("org.openscience.cdk.renderer.RendererModelTest")
 public class RendererModel implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -4420308906715213445L;
-
-    private RenderingParameters parameters;
 
     /* If true, the class will notify its listeners of changes */
     private boolean notification = true;
 
     private transient List<ICDKChangeListener> listeners =
         new ArrayList<ICDKChangeListener>();
-
-    /** Determines how much the image is zoomed into on. */
-    private double zoomFactor = 1.0;
 
     private Map<IAtom, String> toolTipTextMap = new HashMap<IAtom, String>();
 
@@ -79,13 +77,25 @@ public class RendererModel implements Serializable, Cloneable {
 
 	private Map<IAtom, IAtom> merge=new HashMap<IAtom, IAtom>();
 
+	/**
+	 * The color used to highlight external selections.
+	 */
+    public static class ExternalHighlightColor extends
+    AbstractGeneratorParameter<Color> {
+    	/** {@inheritDoc} */
+    	public Color getDefault() {
+    		return Color.gray;
+    	}
+    }
+    private IGeneratorParameter<Color> externalHighlightColor =
+    	new ExternalHighlightColor();
+
     /**
      * The color hash is used to color substructures.
-     *
-     * @see #getColorHash()
      */
     public static class ColorHash extends
     AbstractGeneratorParameter<Map<IChemObject, Color>> {
+    	/** {@inheritDoc} */
         public Map<IChemObject, Color> getDefault() {
             return new Hashtable<IChemObject, Color>();
         }
@@ -94,49 +104,30 @@ public class RendererModel implements Serializable, Cloneable {
     	new ColorHash();
 
     public RendererModel() {
-        this.parameters = new RenderingParameters();
+        renderingParameters.put(colorHash.getClass().getName(), colorHash);
+        renderingParameters.put(
+        	externalHighlightColor.getClass().getName(), externalHighlightColor
+        );
     }
 
-    public RendererModel(RenderingParameters parameters) {
-        this.parameters = parameters;
-    }
-    
-    public int getArrowHeadWidth() {
-        return this.parameters.getArrowHeadWidth();
-    }
-    
-    public void setArrowHeadWidth(int arrowHeadWidth) {
-        this.parameters.setArrowHeadWidth(arrowHeadWidth);
-    }
-
-    public boolean getHighlightShapeFilled() {
-        return this.parameters.isHighlightShapeFilled();
-    }
-
-    public void setHighlightShapeFilled(boolean highlightShapeFilled) {
-        this.parameters.setHighlightShapeFilled(highlightShapeFilled);
-    }
-
-    public double getWedgeWidth() {
-        return this.parameters.getWedgeWidth();
-    }
-
-    public void setWedgeWidth(double wedgeWidth) {
-        this.parameters.setWedgeWidth(wedgeWidth);
-    }
-
-    public double getScale() {
-        return this.parameters.getScale();
-    }
-
-    public void setScale(double scale) {
-        this.parameters.setScale(scale);
-    }
-
+    /**
+     * Set the selected {@link IChemObject}s.
+     * 
+     * @param selection an {@link IChemObjectSelection} with selected
+     *                  {@link IChemObject}s
+     */
+    @TestMethod("testSelection")
     public void setSelection(IChemObjectSelection selection) {
         this.selection = selection;
     }
 
+    /**
+     * Returns an {@link IChemObjectSelection} with the currently selected
+     * {@link IChemObject}s.
+     * 
+     * @return the current selected {@link IChemObject}s
+     */
+    @TestMethod("testSelection")
     public IChemObjectSelection getSelection() {
         return this.selection;
     }
@@ -148,223 +139,17 @@ public class RendererModel implements Serializable, Cloneable {
 	 *
 	 * @return Returns the merge.map
 	 */
+    @TestMethod("testMerge")
 	public Map<IAtom, IAtom> getMerge() {
 		return merge;
 	}
-
-    public boolean getShowReactionBoxes() {
-        return this.parameters.isShowReactionBoxes();
-    }
-
-    public void setShowReactionBoxes(boolean bool) {
-        this.parameters.setShowReactionBoxes(bool);
-        fireChange();
-    }
-
-    public boolean getShowMoleculeTitle() {
-        return this.parameters.isShowMoleculeTitle();
-    }
-
-    public void setShowMoleculeTitle(boolean bool) {
-        this.parameters.setShowMoleculeTitle(bool);
-        fireChange();
-    }
-
-    /**
-     * The length on the screen of a typical bond.
-     *
-     * @return the user-selected length of a bond, or the default length.
-     */
-    public double getBondLength() {
-        return this.parameters.getBondLength();
-    }
-
-    /**
-     * Set the length on the screen of a typical bond.
-     *
-     * @param bondLength the length in pixels of a typical bond.
-     *
-     */
-    public void setBondLength(double length) {
-        this.parameters.setBondLength(length);
-    }
-
-    /**
-     * Returns the thickness of an atom atom mapping line.
-     *
-     * @return the thickness of an atom atom mapping line
-     */
-    public double getMappingLineWidth() {
-        return this.parameters.getMappingLineWidth();
-    }
-
-    /**
-     * Sets the thickness of an atom atom mapping line.
-     *
-     * @param mappingLineWidth
-     *            the thickness of an atom atom mapping line
-     */
-    public void setMappingLineWidth(double mappingLineWidth) {
-        this.parameters.setMappingLineWidth(mappingLineWidth);
-        fireChange();
-    }
-
-    /**
-     * A zoom factor for the drawing.
-     *
-     * @return a zoom factor for the drawing
-     */
-    public double getZoomFactor() {
-        return this.zoomFactor;
-    }
-
-    /**
-     * Returns the zoom factor for the drawing.
-     *
-     * @param zoomFactor
-     *            the zoom factor for the drawing
-     */
-    public void setZoomFactor(double zoomFactor) {
-        this.zoomFactor = zoomFactor;
-        fireChange();
-    }
-
-    public boolean isFitToScreen() {
-        return this.parameters.isFitToScreen();
-    }
-
-    public void setFitToScreen(boolean value) {
-        this.parameters.setFitToScreen(value);
-    }
-
-    /**
-     * Returns the foreground color for the drawing.
-     *
-     * @return the foreground color for the drawing
-     */
-    public Color getForeColor() {
-        return this.parameters.getForeColor();
-    }
-
-    /**
-     * Sets the foreground color with which bonds and atoms are drawn
-     *
-     * @param foreColor
-     *            the foreground color with which bonds and atoms are drawn
-     */
-    public void setForeColor(Color foreColor) {
-        this.parameters.setForeColor(foreColor);
-        fireChange();
-    }
-
-    /**
-     * Returns the atom-atom mapping line color
-     *
-     * @return the atom-atom mapping line color
-     */
-    public Color getAtomAtomMappingLineColor() {
-        return this.parameters.getMappingColor();
-    }
-
-    /**
-     * Sets the atom-atom mapping line color
-     *
-     * @param mappingColor
-     *            the atom-atom mapping line color
-     */
-    public void setAtomAtomMappingLineColor(Color mappingColor) {
-        this.parameters.setMappingColor(mappingColor);
-        fireChange();
-    }
-
-    /**
-     * Returns if the drawing of atom numbers is switched on for this model
-     *
-     * @return true if the drawing of atom numbers is switched on for this model
-     */
-    public boolean drawNumbers() {
-        return this.parameters.isWillDrawNumbers();
-    }
-
-    public boolean getShowImplicitHydrogens() {
-        return this.parameters.isShowImplicitHydrogens();
-    }
-
-    public void setShowImplicitHydrogens(boolean showThem) {
-        this.parameters.setShowImplicitHydrogens(showThem);
-        fireChange();
-    }
-
-    public boolean getShowExplicitHydrogens() {
-        return this.parameters.isShowExplicitHydrogens();
-    }
-
-    public void setShowExplicitHydrogens(boolean showThem) {
-        this.parameters.setShowExplicitHydrogens(showThem);
-        fireChange();
-    }
-
-    /**
-     * Sets if the drawing of atom numbers is switched on for this model.
-     *
-     * @param drawNumbers
-     *            true if the drawing of atom numbers is to be switched on for
-     *            this model
-     */
-    public void setDrawNumbers(boolean drawNumbers) {
-        this.parameters.setWillDrawNumbers(drawNumbers);
-        fireChange();
-    }
-
-    /**
-     * Returns true if atom numbers are drawn.
-     */
-    public boolean getDrawNumbers() {
-        return this.parameters.isWillDrawNumbers();
-    }
-
-    /**
-     * Returns the radius around an atoms, for which the atom is marked
-     * highlighted if a pointer device is placed within this radius.
-     *
-     * @return The highlight distance for all atoms (in screen space)
-     */
-    public double getHighlightDistance() {
-        return this.parameters.getHighlightDistance();
-    }
-
-    /**
-     * Sets the radius around an atoms, for which the atom is marked highlighted
-     * if a pointer device is placed within this radius.
-     *
-     * @param highlightDistance
-     *            the highlight radius of all atoms (in screen space)
-     */
-    public void setHighlightDistance(double highlightDistance) {
-        this.parameters.setHighlightDistance(highlightDistance);
-        fireChange();
-    }
-
-    /**
-     * Returns whether Atom-Atom mapping must be shown.
-     */
-    public boolean getShowAtomAtomMapping() {
-        return this.parameters.isShowAtomAtomMapping();
-    }
-
-    /**
-     * Sets whether Atom-Atom mapping must be shown.
-     */
-    public void setShowAtomAtomMapping(boolean value) {
-        this.parameters.setShowAtomAtomMapping(value);
-        fireChange();
-    }
 
     /**
      * Returns the atom currently highlighted.
      *
      * @return the atom currently highlighted
      */
+    @TestMethod("testHighlightedAtom")
     public IAtom getHighlightedAtom() {
         return this.highlightedAtom;
     }
@@ -375,6 +160,7 @@ public class RendererModel implements Serializable, Cloneable {
      * @param highlightedAtom
      *            The atom to be highlighted
      */
+    @TestMethod("testHighlightedAtom")
     public void setHighlightedAtom(IAtom highlightedAtom) {
         if ((this.highlightedAtom != null) || (highlightedAtom != null)) {
             this.highlightedAtom = highlightedAtom;
@@ -387,6 +173,7 @@ public class RendererModel implements Serializable, Cloneable {
      *
      * @return the Bond currently highlighted
      */
+    @TestMethod("testHighlightedBond")
     public IBond getHighlightedBond() {
         return this.highlightedBond;
     }
@@ -397,6 +184,7 @@ public class RendererModel implements Serializable, Cloneable {
      * @param highlightedBond
      *            The Bond to be currently highlighted
      */
+    @TestMethod("testHighlightedBond")
     public void setHighlightedBond(IBond highlightedBond) {
         if ((this.highlightedBond != null) || (highlightedBond != null)) {
             this.highlightedBond = highlightedBond;
@@ -410,6 +198,7 @@ public class RendererModel implements Serializable, Cloneable {
      *
      * @return an atomcontainer with the atoms and bonds on the clipboard.
      */
+    @TestMethod("testClipboardContent")
     public IAtomContainer getClipboardContent() {
         return clipboardContent;
     }
@@ -421,6 +210,7 @@ public class RendererModel implements Serializable, Cloneable {
      * @param content
      *            the new content of the clipboard.
      */
+    @TestMethod("testClipboardContent")
     public void setClipboardContent(IAtomContainer content) {
         this.clipboardContent = content;
     }
@@ -431,7 +221,7 @@ public class RendererModel implements Serializable, Cloneable {
      * @param listener
      *            The listener added to the list
      */
-
+    @TestMethod("testListening")
     public void addCDKChangeListener(ICDKChangeListener listener) {
         if (listeners == null) {
             listeners = new ArrayList<ICDKChangeListener>();
@@ -447,6 +237,7 @@ public class RendererModel implements Serializable, Cloneable {
      * @param listener
      *            The listener removed from the list
      */
+    @TestMethod("testListening")
     public void removeCDKChangeListener(ICDKChangeListener listener) {
         listeners.remove(listener);
     }
@@ -455,6 +246,7 @@ public class RendererModel implements Serializable, Cloneable {
      * Notifies registered listeners of certain changes that have occurred in
      * this model.
      */
+    @TestMethod("testListening")
     public void fireChange() {
         if (getNotification() && listeners != null) {
             EventObject event = new EventObject(this);
@@ -471,32 +263,13 @@ public class RendererModel implements Serializable, Cloneable {
      *            The atom.
      * @return The toolTipText value.
      */
+    @TestMethod("testToolTipFunctionality,testNoDefaultToolTips")
     public String getToolTipText(IAtom atom) {
         if (toolTipTextMap.get(atom) != null) {
             return toolTipTextMap.get(atom);
         } else {
             return null;
         }
-    }
-
-    /**
-     * Sets the showTooltip attribute.
-     *
-     * @param showToolTip
-     *            The new value.
-     */
-    public void setShowTooltip(boolean showTooltip) {
-        this.parameters.setShowTooltip(showTooltip);
-        fireChange();
-    }
-
-    /**
-     * Gets showTooltip attribute.
-     *
-     * @return The showTooltip value.
-     */
-    public boolean getShowTooltip() {
-        return this.parameters.isShowTooltip();
     }
 
     /**
@@ -507,6 +280,7 @@ public class RendererModel implements Serializable, Cloneable {
      *            Strings to display as values. A line break will be inserted
      *            where a \n is in the string.
      */
+    @TestMethod("testToolTipFunctionality")
     public void setToolTipTextMap(Map<IAtom, String> map) {
         toolTipTextMap = map;
         fireChange();
@@ -517,59 +291,9 @@ public class RendererModel implements Serializable, Cloneable {
      *
      * @return The toolTipTextValue.
      */
+    @TestMethod("testToolTipFunctionality")
     public Map<IAtom, String> getToolTipTextMap() {
         return toolTipTextMap;
-    }
-
-    /**
-     * Gets the color used for drawing the part which was selected externally
-     */
-    public Color getExternalHighlightColor() {
-        return this.parameters.getExternalHighlightColor();
-    }
-
-    /**
-     * Sets the color used for drawing the part which was selected externally
-     *
-     * @param externalHighlightColor
-     *            The color
-     */
-    public void setExternalHighlightColor(Color externalHighlightColor) {
-        this.parameters.setExternalHighlightColor(externalHighlightColor);
-    }
-
-    /**
-     * Gets the color used for drawing the part we are hovering over.
-     */
-    public Color getHoverOverColor() {
-        return this.parameters.getHoverOverColor();
-    }
-
-    /**
-     * Sets the color used for drawing the part we are hovering over.
-     *
-     * @param hoverOverColor
-     *            The color
-     */
-    public void setHoverOverColor(Color hoverOverColor) {
-        this.parameters.setHoverOverColor(hoverOverColor);
-    }
-
-    /**
-     * Gets the color used for drawing the internally selected part.
-     */
-    public Color getSelectedPartColor() {
-        return this.parameters.getSelectedPartColor();
-    }
-
-    /**
-     * Sets the color used for drawing the internally selected part.
-     *
-     * @param selectedPartColor
-     *            The color
-     */
-    public void setSelectedPartColor(Color selectedPartColor) {
-        this.parameters.setSelectedPartColor(selectedPartColor);
     }
 
     /**
@@ -578,6 +302,7 @@ public class RendererModel implements Serializable, Cloneable {
      *
      * @return the selected part
      */
+    @TestMethod("testExternalSelectedPart")
     public IAtomContainer getExternalSelectedPart() {
         return externalSelectedPart;
     }
@@ -589,61 +314,65 @@ public class RendererModel implements Serializable, Cloneable {
      * @param externalSelectedPart
      *            the selected part
      */
+    @TestMethod("testExternalSelectedPart")
     public void setExternalSelectedPart(IAtomContainer externalSelectedPart) {
         this.externalSelectedPart = externalSelectedPart;
         Map<IChemObject, Color> colorHash =
-        	getRenderingParameter(ColorHash.class).getValue();
+        	getParameter(ColorHash.class).getValue();
         colorHash.clear();
         if(externalSelectedPart !=null) {
             for (int i = 0; i < externalSelectedPart.getAtomCount(); i++) {
                 colorHash.put(externalSelectedPart.getAtom(i),
-                                   this.getExternalHighlightColor());
+                    this.getParameter(ExternalHighlightColor.class).
+                    getValue());
             }
             Iterator<IBond> bonds = externalSelectedPart.bonds().iterator();
             while (bonds.hasNext()) {
-            	colorHash.put(bonds.next(), getExternalHighlightColor());
+            	colorHash.put(bonds.next(),
+            		this.getParameter(ExternalHighlightColor.class).
+                        getValue()
+                );
             }
         }
         fireChange();
     }
 
+    /**
+     * Determines if the model sends around change notifications.
+     *
+     * @return true, if notifications are sent around upon changes
+     */
+	@TestMethod("testGetSetNotification")
     public boolean getNotification() {
         return notification;
     }
 
+	/**
+	 * Dis- or enables sending around change notifications.
+	 * 
+	 * @param notification true if notifications should be sent, false otherwise.
+	 */
+	@TestMethod("testGetSetNotification")
     public void setNotification(boolean notification) {
         this.notification = notification;
     }
 
-    public boolean showAtomTypeNames() {
-        return this.parameters.isShowAtomTypeNames();
-    }
-
-    public void setShowAtomTypeNames(boolean showAtomTypeNames) {
-        this.parameters.setShowAtomTypeNames(showAtomTypeNames);
-    }
-
-    public Color getBoundsColor() {
-        return this.parameters.getBoundsColor();
-    }
-
-    public void setBoundsColor(Color color) {
-        this.parameters.setBoundsColor(color);
-    }
-
-	/**
-	 * @return the on screen radius of the selection element
-	 */
-	public double getSelectionRadius() {
-		return this.parameters.getSelectionRadius();
-	}
-
-	public void setSelectionRadius(double selectionRadius) {
-		this.parameters.setSelectionRadius(selectionRadius);
-	}
-
 	private Map<String,IGeneratorParameter<?>> renderingParameters =
 	        new HashMap<String,IGeneratorParameter<?>>();
+
+	/**
+	 * Returns all {@link IGeneratorParameter}s for the current
+	 * {@link RendererModel}.
+	 *
+	 * @return a new List with {@link IGeneratorParameter}s
+	 */
+	@TestMethod("testGetRenderingParameters")
+	public List<IGeneratorParameter<?>> getRenderingParameters() {
+		List<IGeneratorParameter<?>> parameters =
+			new ArrayList<IGeneratorParameter<?>>();
+		parameters.addAll(renderingParameters.values());
+		return parameters;
+	}
 
 	/**
 	 * Returns the {@link IGeneratorParameter} for the active {@link IRenderer}.
@@ -652,31 +381,92 @@ public class RendererModel implements Serializable, Cloneable {
 	 * @param param {@link IGeneratorParameter} to get the value of.
 	 * @return the {@link IGeneratorParameter} instance with the active value.
 	 */
-	public <T extends IGeneratorParameter<?> >T getRenderingParameter(Class<T> param) {
-	    if (renderingParameters.containsKey(param.getClass().getName()))
-	        return (T)renderingParameters.get(param.getClass().getName());
-	    try {
-            return param.newInstance();
-        } catch (InstantiationException exception) {
-            throw new RuntimeException(
-                "Could not instantiate a default " +
-                param.getClass().getName(), exception
-            );
-        } catch (IllegalAccessException exception) {
-            throw new RuntimeException(
-                "Could not instantiate a default " +
-                param.getClass().getName(), exception
-            );
-        }
+	@TestMethod("testGetRenderingParameter,testReturningTheRealParamaterValue")
+	public <T extends IGeneratorParameter<?> >T getParameter(Class<T> param) {
+	    if (renderingParameters.containsKey(param.getName()))
+	        return (T)renderingParameters.get(param.getName());
+
+	    // the parameter was not registered yet, so we throw an exception to
+	    // indicate that the API is not used correctly.
+	    throw new IllegalAccessError(
+			"You requested the active parameter of type " +
+			param.getName() + ", but it " +
+			"has not been registered yet. Did you " +
+			"make sure the IGeneratorParameter is registered, by " +
+			"registring the appropriate IGenerator? Alternatively, " +
+			"you can use getDefault() to query the default value for " +
+			"any parameter on the classpath."
+	    );
 	}
 
 	/**
-	 * Registers rendering parameters from {@link IGenerator}s with this
+	 * Returns the default value for the {@link IGeneratorParameter} for the
+	 * active {@link IRenderer}.
+	 *
+	 * @param param {@link IGeneratorParameter} to get the value of.
+	 * @return the default value for which the type is defined by the provided
+	 *         {@link IGeneratorParameter}-typed <code>param</code> parameter.
+	 *
+	 * @see #get(Class)
+	 */
+	@TestMethod("testGetDefaultRenderingParameter")
+	public <T extends IGeneratorParameter<S>,S> S getDefault(Class<T> param) {
+		if (renderingParameters.containsKey(param.getName()))
+	        return getParameter(param).getDefault();
+
+		// OK, this parameter is not registered, but that's fine, as we are
+		// only to return the default value anyway...
+		try {
+			return param.newInstance().getDefault();
+		} catch (InstantiationException exception) {
+			throw new IllegalArgumentException(
+					"Could not instantiate a default " +
+					param.getClass().getName(), exception
+			);
+		} catch (IllegalAccessException exception) {
+			throw new IllegalArgumentException(
+					"Could not instantiate a default " +
+					param.getClass().getName(), exception
+			);
+		}
+	}
+
+	/**
+	 * Sets the {@link IGeneratorParameter} for the active {@link IRenderer}.
+	 * @param <T>
+	 *
+	 * @param paramType {@link IGeneratorParameter} to set the value of.
+	 * @param value     new {@link IGeneratorParameter} value
+	 */
+	@TestMethod("testSetRenderingParameter")
+	public <T extends IGeneratorParameter<S>,S> void set(
+			Class<T> paramType, S value) {
+		T parameter = getParameter(paramType);
+		parameter.setValue(value);
+	}
+
+	/**
+	 * Returns the {@link IGeneratorParameter} for the active {@link IRenderer}.
+	 * @param <T>
+	 *
+	 * @param paramType {@link IGeneratorParameter} to get the value of.
+	 * @return the {@link IGeneratorParameter} value.
+	 *
+	 * @see #getParameter(Class)
+	 */
+	@TestMethod("testSetRenderingParameter")
+	public <T extends IGeneratorParameter<S>,S> S get(Class<T> paramType) {
+		return getParameter(paramType).getValue();
+	}
+
+	/**
+	 * Registers rendering parameters from {@link IAtomContainerGenerator}s with this
 	 * model.
 	 *
 	 * @param generator
 	 */
-    public void registerParameters(IGenerator generator) {
+	@TestMethod("testGetRenderingParameter,testReturningTheRealParamaterValue")
+    public void registerParameters(IGenerator<? extends IChemObject> generator) {
         for (IGeneratorParameter<?> param : generator.getParameters()) {
             renderingParameters.put(
                 param.getClass().getName(),

@@ -23,12 +23,6 @@
  */
 package org.openscience.cdk.config;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import org.openscience.cdk.annotations.TestClass;
 import org.openscience.cdk.annotations.TestMethod;
 import org.openscience.cdk.config.isotopes.IsotopeReader;
@@ -40,11 +34,17 @@ import org.openscience.cdk.interfaces.IIsotope;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 /**
  * Used to store and return data of a particular isotope. As this class is a
  * singleton class, one gets an instance with: 
  * <pre>
- * IsotopeFactory ifac = IsotopFactory.getInstance(new IChemObject().getBuilder());
+ * IsotopeFactory ifac = IsotopFactory.getInstance(new IChemObject().getNewBuilder());
  * </pre>
  *
  * <p>Data about the isotopes are read from the file
@@ -55,7 +55,7 @@ import org.openscience.cdk.tools.LoggingToolFactory;
  * <p>The use of this class is exemplified as follows. To get information 
  * about the major isotope of hydrogen, one can use this code:
  * <pre>
- *   IsotopeFactory factory = IsotopeFactory.getInstance(DefaultChemObjectBuilder.getInstance());
+ *   IsotopeFactory factory = IsotopeFactory.getInstance(NewDefaultChemObjectBuilder.getInstance());
  *   Isotope major = factory.getMajorIsotope("H");
  * </pre> 
  *
@@ -169,6 +169,29 @@ public class IsotopeFactory
         return list.toArray(new IIsotope[list.size()]);
     }
 
+    /**
+     * Get isotope based on element symbol and mass number.
+     *
+     * @param symbol the element symbol
+     * @param massNumber the mass number
+     * @return the corresponding isotope
+     */
+    @TestMethod("testGetIsotope")
+    public IIsotope getIsotope(String symbol, int massNumber) {
+        IIsotope ret = null;
+        for (IIsotope isotope : isotopes) {
+            if (isotope.getSymbol().equals(symbol) && isotope.getMassNumber() == massNumber) {
+                try {
+                    ret = (IIsotope) isotope.clone();
+                } catch (CloneNotSupportedException e) {
+                    logger.error("Could not clone IIsotope: ", e.getMessage());
+                    logger.debug(e);
+                }
+                return ret;
+            }
+        }
+        return null;
+    }
 
     /**
 	 * Returns the most abundant (major) isotope with a given atomic number.
@@ -301,7 +324,11 @@ public class IsotopeFactory
     @TestMethod("testConfigure_IAtom")
     public IAtom configure(IAtom atom)
 	{
-		IIsotope isotope = getMajorIsotope(atom.getSymbol());
+		IIsotope isotope;
+
+        if (atom.getMassNumber() == null) isotope = getMajorIsotope(atom.getSymbol());
+        else isotope = getIsotope(atom.getSymbol(), atom.getMassNumber());
+
 		return configure(atom, isotope);
 	}
 

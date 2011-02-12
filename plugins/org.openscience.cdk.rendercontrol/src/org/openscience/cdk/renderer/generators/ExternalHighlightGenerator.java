@@ -24,7 +24,7 @@
  */
 package org.openscience.cdk.renderer.generators;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.vecmath.Point2d;
@@ -33,16 +33,32 @@ import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.renderer.RendererModel;
+import org.openscience.cdk.renderer.RendererModel.ExternalHighlightColor;
 import org.openscience.cdk.renderer.elements.ElementGroup;
 import org.openscience.cdk.renderer.elements.IRenderingElement;
 import org.openscience.cdk.renderer.elements.LineElement;
 import org.openscience.cdk.renderer.elements.OvalElement;
 import org.openscience.cdk.renderer.generators.BasicBondGenerator.BondWidth;
+import org.openscience.cdk.renderer.generators.BasicSceneGenerator.Scale;
+import org.openscience.cdk.renderer.generators.parameter.AbstractGeneratorParameter;
 
 /**
  * @cdk.module rendercontrol
  */
-public class ExternalHighlightGenerator implements IGenerator {
+public class ExternalHighlightGenerator implements IGenerator<IAtomContainer> {
+    
+    /**
+     * The maximum distance on the screen the mouse pointer has to be to
+     * highlight an external highlight.
+     */
+    public static class ExternalHighlightDistance extends 
+                        AbstractGeneratorParameter<Double> {
+        public Double getDefault() {
+            return 8.0;
+        }
+    }
+    private ExternalHighlightDistance externalHighlightDistance =
+    	new ExternalHighlightDistance();
 
     public ExternalHighlightGenerator() {}
 
@@ -62,20 +78,32 @@ public class ExternalHighlightGenerator implements IGenerator {
 
     public IRenderingElement generate(IAtom atom, RendererModel model) {
         Point2d p = atom.getPoint2d();
-        double r = model.getHighlightDistance() / model.getScale();
-        return new OvalElement(p.x, p.y, r, model.getExternalHighlightColor());
+        double r = 
+            model.getParameter(
+                    ExternalHighlightDistance.class).getValue() /
+                   model.getParameter(Scale.class).getValue();
+        return new OvalElement(p.x, p.y, r,
+        	model.getParameter(ExternalHighlightColor.class).getValue()
+        );
     }
 
     public IRenderingElement generate(IBond bond, RendererModel model) {
         Point2d p1 = bond.getAtom(0).getPoint2d();
         Point2d p2 = bond.getAtom(1).getPoint2d();
-        double w = model.getRenderingParameter(BondWidth.class).getValue() / model.getScale();
+        double w = model.getParameter(BondWidth.class).getValue() /
+                   model.getParameter(Scale.class).getValue();
         return new LineElement(
-                p1.x, p1.y, p2.x, p2.y, w, model.getExternalHighlightColor());
+            p1.x, p1.y, p2.x, p2.y, w,
+            model.getParameter(ExternalHighlightColor.class).getValue()
+        );
     }
 
     public List<IGeneratorParameter<?>> getParameters() {
-        return Collections.emptyList();
+    	return Arrays.asList(
+            new IGeneratorParameter<?>[] {
+                    externalHighlightDistance
+            }
+    	);
     }
 
 }

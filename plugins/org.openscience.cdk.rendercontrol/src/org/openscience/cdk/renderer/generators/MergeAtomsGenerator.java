@@ -31,12 +31,14 @@ import org.openscience.cdk.renderer.RendererModel;
 import org.openscience.cdk.renderer.elements.ElementGroup;
 import org.openscience.cdk.renderer.elements.IRenderingElement;
 import org.openscience.cdk.renderer.elements.path.PathBuilder;
+import org.openscience.cdk.renderer.generators.BasicSceneGenerator.Scale;
+import org.openscience.cdk.renderer.generators.HighlightAtomGenerator.HighlightAtomDistance;
 
 /**
  * @cdk.module rendercontrol
  */
 public class MergeAtomsGenerator extends BasicAtomGenerator
-                                implements IGenerator {
+                                implements IGenerator<IAtomContainer> {
 
     public MergeAtomsGenerator() {}
 
@@ -50,7 +52,10 @@ public class MergeAtomsGenerator extends BasicAtomGenerator
 
     public IRenderingElement generate(IAtomContainer ac, RendererModel model) {
     	ElementGroup selectionElements = new ElementGroup();
-    	double radius = model.getHighlightDistance() / model.getScale();
+    	double mergeDistance = model.getParameter(
+    	                            HighlightAtomDistance.class).getValue(); 
+    	double radius = mergeDistance /
+    	                model.getParameter(Scale.class).getValue();
     	radius /= 2.0;
     	for(IAtom atom : model.getMerge().keySet()){
     		Point2d p1 = atom.getPoint2d();

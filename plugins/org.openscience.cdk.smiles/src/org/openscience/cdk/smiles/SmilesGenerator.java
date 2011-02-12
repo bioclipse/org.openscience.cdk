@@ -133,7 +133,7 @@ public class SmilesGenerator
 
 	/**
 	 *  Create the SMILES generator.
-	 *  @param userAromaticityFlag if false only SP2-hybridized atoms will be lower case (default), true=SP2 or aromaticity trigger lower case (same as using setUseAromaticityFlag later)
+	 *  @param useAromaticityFlag if false only SP2-hybridized atoms will be lower case (default), true=SP2 or aromaticity trigger lower case (same as using setUseAromaticityFlag later)
 	 */
 	public SmilesGenerator(boolean useAromaticityFlag) {
 		this.useAromaticityFlag=useAromaticityFlag;
@@ -201,7 +201,7 @@ public class SmilesGenerator
      * @return the SMILES representation of the molecule
      */
     @TestMethod("testCisResorcinol,testEthylPropylPhenantren,testAlanin")
-    public synchronized String createSMILES(IMolecule molecule)
+    public synchronized String createSMILES(IAtomContainer molecule)
 	{
 		try
 		{
@@ -285,7 +285,7 @@ public class SmilesGenerator
      * @return the SMILES representation of the molecule
 	 */
     @TestMethod("testAlaSMILES,testSugarSMILES")
-    public synchronized String createChiralSMILES(IMolecule molecule, boolean[] doubleBondConfiguration) throws CDKException
+    public synchronized String createChiralSMILES(IAtomContainer molecule, boolean[] doubleBondConfiguration) throws CDKException
 	{
 		return (createSMILES(molecule, true, doubleBondConfiguration));
 	}
@@ -316,7 +316,7 @@ public class SmilesGenerator
      * @see                             org.openscience.cdk.graph.invariant.CanonicalLabeler#canonLabel(IAtomContainer)
      * @return the SMILES representation of the molecule
      */
-	public synchronized String createSMILES(IMolecule molecule, boolean chiral, boolean doubleBondConfiguration[]) throws CDKException
+	public synchronized String createSMILES(IAtomContainer molecule, boolean chiral, boolean doubleBondConfiguration[]) throws CDKException
 	{
 		IMoleculeSet moleculeSet = ConnectivityChecker.partitionIntoMolecules(molecule);
 		if (moleculeSet.getMoleculeCount() > 1)
@@ -358,9 +358,6 @@ public class SmilesGenerator
      *                                  If flag is true for a bond which does not constitute a valid double bond configuration, it will be 
      *                                  ignored (meaning setting all to true will create E/Z indication will be pu in the smiles wherever 
      *                                  possible, but note the coordinates might be arbitrary).
-	 * @param  detectAromaticity        true=an aromaticity detection will be done
-	 *                                  (using setRings avoids ring search for that),
-	 *                                  false=no aromaticity detection will be done
 	 * @exception  CDKException         At least one atom has no Point2D;
 	 *      coordinates are needed for creating the chiral smiles. This excpetion
 	 *      can only be thrown if chiral smiles is created, ignore it if you want a
@@ -370,7 +367,7 @@ public class SmilesGenerator
      * @return the SMILES representation of the molecule
 	 */
 	@TestMethod("testCreateSMILESWithoutCheckForMultipleMolecules_withDetectAromaticity,testCreateSMILESWithoutCheckForMultipleMolecules_withoutDetectAromaticity")
-	public synchronized String createSMILESWithoutCheckForMultipleMolecules(IMolecule molecule, boolean chiral, boolean doubleBondConfiguration[]) throws CDKException
+	public synchronized String createSMILESWithoutCheckForMultipleMolecules(IAtomContainer molecule, boolean chiral, boolean doubleBondConfiguration[]) throws CDKException
 	{
 		if (molecule.getAtomCount() == 0)
 		{
@@ -503,9 +500,9 @@ public class SmilesGenerator
 			return false;
 		}
 		// TO-DO: We make the silent assumption of unset hydrogen count equals zero hydrogen count here.
-		int lengthAtom = container.getConnectedAtomsCount(atom) + ((atom.getHydrogenCount() == CDKConstants.UNSET) ? 0 : atom.getHydrogenCount());
+		int lengthAtom = container.getConnectedAtomsCount(atom) + ((atom.getImplicitHydrogenCount() == CDKConstants.UNSET) ? 0 : atom.getImplicitHydrogenCount());
 		// TO-DO: We make the silent assumption of unset hydrogen count equals zero hydrogen count here.
-		int lengthParent = container.getConnectedAtomsCount(parent) + ((parent.getHydrogenCount() == CDKConstants.UNSET) ? 0 : parent.getHydrogenCount());
+		int lengthParent = container.getConnectedAtomsCount(parent) + ((parent.getImplicitHydrogenCount() == CDKConstants.UNSET) ? 0 : parent.getImplicitHydrogenCount());
 		if (container.getBond(atom, parent) != null)
 		{
 			if (container.getBond(atom, parent).getOrder() == CDKConstants.BONDORDER_DOUBLE && (lengthAtom == 3 || (lengthAtom == 2 && atom.getSymbol().equals("N"))) && (lengthParent == 3 || (lengthParent == 2 && parent.getSymbol().equals("N"))))
@@ -553,7 +550,7 @@ public class SmilesGenerator
 	private boolean isStartOfDoubleBond(IAtomContainer container, IAtom a, IAtom parent, boolean[] doubleBondConfiguration)
 	{
 		// TO-DO: We make the silent assumption of unset hydrogen count equals zero hydrogen count here.
-		int lengthAtom = container.getConnectedAtomsCount(a) + ((a.getHydrogenCount() == CDKConstants.UNSET) ? 0 : a.getHydrogenCount());
+		int lengthAtom = container.getConnectedAtomsCount(a) + ((a.getImplicitHydrogenCount() == CDKConstants.UNSET) ? 0 : a.getImplicitHydrogenCount());
 		if (lengthAtom != 3 && (lengthAtom != 2 && !a.getSymbol().equals("N")))
 		{
 			return (false);
@@ -1535,7 +1532,22 @@ public class SmilesGenerator
 				boolean brackets = true;
 				List result = new Vector();
 				addAtoms((List) o, result);
-				if (isRingOpening(parent, result) && container.getConnectedBondsCount(parent) < 4)
+				IAtom prevAtom;
+
+				/*				
+				 * Got to find last atom that was processed.
+				 * This is to check the relative position of the current atom/chain with respect to its parent
+				*/				
+				prevAtom = (IAtom)((Vector)atomsInOrderOfSmiles).lastElement();
+				int maxConnectedBondCount = 4;
+				/**
+				 * If the parent atom of this new chain is the very first atom in the SMILES string and this chain is placed
+				 * immediately after the parent atom then the max connected bond count for the parent should be 3 instead of 4.
+				 */
+				if (atomsInOrderOfSmiles.indexOf(parent) == 0 && prevAtom == parent){
+					maxConnectedBondCount = 3;
+				}
+				if (isRingOpening(parent, result) && container.getConnectedBondsCount(parent) < maxConnectedBondCount)
 				{
 					brackets = false;
 				}
@@ -1649,8 +1661,8 @@ public class SmilesGenerator
 			} else
 			{
 				buffer.append(symbol);
-                if (symbol.equals("*") && a.getHydrogenCount() != null && a.getHydrogenCount() > 0)
-                    buffer.append("H").append(a.getHydrogenCount());
+                if (symbol.equals("*") && a.getImplicitHydrogenCount() != null && a.getImplicitHydrogenCount() > 0)
+                    buffer.append("H").append(a.getImplicitHydrogenCount());
 			}
 			if (a.getProperty(RING_CONFIG) != null && a.getProperty(RING_CONFIG).equals(UP))
 			{
@@ -1813,7 +1825,7 @@ public class SmilesGenerator
         }
 
         IIsotope majorIsotope = isotopeFactory.getMajorIsotope(a.getSymbol());
-		if (majorIsotope.getMassNumber() == a.getMassNumber())
+		if (majorIsotope == null || majorIsotope.getMassNumber() == a.getMassNumber())
 		{
 			return "";
 		} else if (a.getMassNumber() == null)

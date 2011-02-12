@@ -18,13 +18,18 @@
  */
 package org.openscience.cdk.renderer.generators;
 
+import java.awt.Color;
 import java.awt.geom.Rectangle2D;
+import java.util.Arrays;
+import java.util.List;
 
 import org.openscience.cdk.interfaces.IReaction;
-import org.openscience.cdk.renderer.Renderer;
+import org.openscience.cdk.renderer.BoundsCalculator;
 import org.openscience.cdk.renderer.RendererModel;
 import org.openscience.cdk.renderer.elements.ArrowElement;
 import org.openscience.cdk.renderer.elements.IRenderingElement;
+import org.openscience.cdk.renderer.generators.BasicBondGenerator.BondLength;
+import org.openscience.cdk.renderer.generators.BasicSceneGenerator.Scale;
 
 /**
  * Generate the arrow for a reaction.
@@ -33,22 +38,35 @@ import org.openscience.cdk.renderer.elements.IRenderingElement;
  * @cdk.module renderextra
  *
  */
-public class ReactionArrowGenerator implements IReactionGenerator {
+public class ReactionArrowGenerator implements IGenerator<IReaction> {
 
 	public IRenderingElement generate(IReaction reaction, RendererModel model) {
         Rectangle2D totalBoundsReactants = 
-            Renderer.calculateBounds(reaction.getReactants());
+        	BoundsCalculator.calculateBounds(reaction.getReactants());
         Rectangle2D totalBoundsProducts = 
-            Renderer.calculateBounds(reaction.getProducts());
+        	BoundsCalculator.calculateBounds(reaction.getProducts());
         
         if (totalBoundsReactants == null || totalBoundsProducts == null)
         	return null;
         
-        double d = model.getBondLength() / model.getScale();
-        return new ArrowElement(totalBoundsReactants.getMaxX() + d,
-                                totalBoundsReactants.getCenterY(), 
-                                totalBoundsProducts.getMinX() - d, 
-                                totalBoundsReactants.getCenterY(),
-                                1 / model.getScale(),true,model.getForeColor());
+        double d = model.getParameter(BondLength.class)
+    		.getValue() / model.getParameter(Scale.class).getValue();
+        Color foregroundColor = model.getParameter(
+            BasicSceneGenerator.ForegroundColor.class).getValue();
+        return new ArrowElement(
+        	totalBoundsReactants.getMaxX() + d,
+            totalBoundsReactants.getCenterY(), 
+            totalBoundsProducts.getMinX() - d, 
+            totalBoundsReactants.getCenterY(),
+            1 / model.getParameter(Scale.class).getValue(), true,
+            foregroundColor
+        );
 	}
+
+	public List<IGeneratorParameter<?>> getParameters() {
+        return Arrays.asList(
+            new IGeneratorParameter<?>[] {
+            }
+        );
+    }
 }

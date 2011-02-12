@@ -20,16 +20,20 @@
 package org.openscience.cdk.renderer.generators;
 
 
+import java.awt.Color;
 import java.awt.geom.Rectangle2D;
+import java.util.Arrays;
+import java.util.List;
 
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IMoleculeSet;
 import org.openscience.cdk.interfaces.IReaction;
-import org.openscience.cdk.renderer.Renderer;
+import org.openscience.cdk.renderer.BoundsCalculator;
 import org.openscience.cdk.renderer.RendererModel;
 import org.openscience.cdk.renderer.elements.ElementGroup;
 import org.openscience.cdk.renderer.elements.IRenderingElement;
 import org.openscience.cdk.renderer.elements.RectangleElement;
+import org.openscience.cdk.renderer.generators.parameter.AbstractGeneratorParameter;
 
 
 /**
@@ -38,8 +42,20 @@ import org.openscience.cdk.renderer.elements.RectangleElement;
  * @author maclean
  * @cdk.module renderextra
  */
-public class BoundsGenerator implements IReactionGenerator {
-    
+public class BoundsGenerator implements IGenerator<IReaction> {
+
+	/**
+	 * The color of the box drawn at the bounds of a
+	 * molecule, molecule set, or reaction.
+	 */
+    public static class BoundsColor extends
+    AbstractGeneratorParameter<Color> {
+        public Color getDefault() {
+            return Color.LIGHT_GRAY;
+        }
+    }
+    private IGeneratorParameter<Color> boundsColor = new BoundsColor();
+
     public BoundsGenerator() {}
     
     public IRenderingElement generate(IReaction reaction, RendererModel model) {
@@ -58,23 +74,30 @@ public class BoundsGenerator implements IReactionGenerator {
     }
     
     public IRenderingElement generate(IMolecule molecule, RendererModel model) {
-        Rectangle2D bounds = Renderer.calculateBounds(molecule);
+        Rectangle2D bounds = BoundsCalculator.calculateBounds(molecule);
         return new RectangleElement(bounds.getMinX(),
                 bounds.getMinY(),
                 bounds.getMaxX(),
                 bounds.getMaxY(),
-                model.getBoundsColor());
+                boundsColor.getValue());
     }
     
     public IRenderingElement generate(
             IMoleculeSet moleculeSet, RendererModel model) {
-        Rectangle2D totalBounds = Renderer.calculateBounds(moleculeSet);
+        Rectangle2D totalBounds = BoundsCalculator.calculateBounds(moleculeSet);
         
         return new RectangleElement(totalBounds.getMinX(),
                                     totalBounds.getMinY(),
                                     totalBounds.getMaxX(),
                                     totalBounds.getMaxY(),
-                                    model.getBoundsColor());
+                                    boundsColor.getValue());
     }
 
+	public List<IGeneratorParameter<?>> getParameters() {
+        return Arrays.asList(
+            new IGeneratorParameter<?>[] {
+            	boundsColor
+            }
+        );
+    }
 }
