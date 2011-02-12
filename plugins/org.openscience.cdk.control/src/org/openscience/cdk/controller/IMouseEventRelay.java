@@ -86,4 +86,8 @@ public interface IMouseEventRelay {
          */
         public abstract void mouseClickedUpRight(int screenCoordX, int screenCoordY);
 
+		public abstract void mouseWheelMovedBackward(int i);
+
+		public abstract void mouseWheelMovedForward(int i);
+
 }
