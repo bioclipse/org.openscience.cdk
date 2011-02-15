@@ -118,6 +118,9 @@ public class ReactionSetRenderer extends AbstractRenderer<IReactionSet>
      */
 	public ReactionSetRenderer(List<IGenerator<IAtomContainer>> generators, IFontManager fontManager) {
         this.fontManager = fontManager;
+        for (IGenerator<IAtomContainer> generator : generators) {
+            rendererModel.registerParameters(generator);
+        }
         reactionRenderer = new ReactionRenderer(generators, fontManager);
         this.setup();
     }
