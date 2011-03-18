@@ -18,7 +18,8 @@ Require-Bundle: org.openscience.cdk.annotation,
  org.openscience.cdk.valencycheck,
  org.openscience.cdk.signature,
  javax.vecmath,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ signatures;bundle-version="1.0.0"
 Export-Package: org.openscience.cdk.smsd.global,
  org.openscience.cdk.smsd.interfaces,
  org.openscience.cdk.smsd.filters,
