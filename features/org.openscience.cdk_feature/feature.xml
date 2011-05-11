@@ -1,20 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.openscience.cdk_feature"
-      label="Cdk_feature"
-      version="1.3.0">
+      label="The Chemistry Development Kit"
+      version="1.3.8">
 
-   <description url="http://www.example.com/description">
-      [Enter Feature Description here.]
+   <description url="http://cdk.sf.net/">
+      The Chemistry Development Kit is an Open Source chem- and bioinformatics
+library.
    </description>
 
-   <copyright url="http://www.example.com/copyright">
-      [Enter Copyright Description here.]
+   <copyright>
+      Copyright 1997-2011 by many CDK developers.
    </copyright>
 
-   <license url="http://www.example.com/license">
-      [Enter License Description here.]
+   <license>
+      LGPL v2.1.
    </license>
+
+   <url>
+      <discovery label="CDK Homepage" url="http://cdk.sf.net/"/>
+      <discovery label="Planet CDK" url="http://pele.farmbio.uu.se/planetcdk/"/>
+   </url>
 
    <plugin
          id="org.openscience.cdk.annotation"
